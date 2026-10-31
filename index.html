@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#160d2b"><title>Couple Zone</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header><div class="brand">💜 COUPLE ZONE</div><button id="langBtn" class="ghost">Kiswahili</button></header>
+    <section id="authPanel" class="panel">
+      <p class="eyebrow">A private space for two adults</p><h1 id="welcome">Grow closer, together.</h1>
+      <div class="tabs"><button id="loginTab" class="active">Log in</button><button id="signupTab">Create account</button></div>
+      <form id="authForm">
+        <label>Email<input id="email" type="email" autocomplete="email" required></label>
+        <label>Password<input id="password" type="password" minlength="8" autocomplete="current-password" required></label>
+        <label id="nameWrap" class="hidden">Display name<input id="displayName" maxlength="40"></label>
+        <label class="check"><input id="adult" type="checkbox"> I confirm I am 18 years old or older.</label>
+        <button class="primary" id="authSubmit">Log in</button>
+      </form><p id="authMsg" class="msg" aria-live="polite"></p>
+    </section>
+    <section id="appPanel" class="panel hidden">
+      <div class="row"><div><p class="eyebrow">YOUR PRIVATE SPACE</p><h1 id="hello">Welcome</h1></div><button id="logout" class="ghost">Log out</button></div>
+      <div class="card"><h2>Connect with your partner</h2><p>Create a six-digit invitation code to share with your partner.</p><button id="createInvite" class="primary">Create invitation code</button><div id="inviteResult" class="invite"></div>
+      <hr><p>Have a code from your partner?</p><div class="joinrow"><input id="joinCode" inputmode="numeric" maxlength="6" placeholder="6-digit code"><button id="joinInvite" class="secondary">Join</button></div></div>
+      <div class="card"><h2>Your couple space</h2><p id="coupleStatus">You have not connected a partner yet.</p></div>
+    </section>
+    <footer>COUPLE ZONE • 18+ • Consent, respect and privacy first</footer>
+  </main>
+  <script src="app.js"></script>
+</body></html>
