@@ -1,33 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#160d2b"><title>Couple Zone</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#170d2b"><title>Couple Zone</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script><script defer src="app.js"></script>
 </head>
 <body>
-  <main class="shell">
-    <header><div class="brand">💜 COUPLE ZONE</div><button id="langBtn" class="ghost">Kiswahili</button></header>
-    <section id="authPanel" class="panel">
-      <p class="eyebrow">A private space for two adults</p><h1 id="welcome">Grow closer, together.</h1>
-      <div class="tabs"><button id="loginTab" class="active">Log in</button><button id="signupTab">Create account</button></div>
-      <form id="authForm">
-        <label>Email<input id="email" type="email" autocomplete="email" required></label>
-        <label>Password<input id="password" type="password" minlength="8" autocomplete="current-password" required></label>
-        <label id="nameWrap" class="hidden">Display name<input id="displayName" maxlength="40"></label>
-        <label class="check"><input id="adult" type="checkbox"> I confirm I am 18 years old or older.</label>
-        <button class="primary" id="authSubmit">Log in</button>
-      </form><p id="authMsg" class="msg" aria-live="polite"></p>
-    </section>
-    <section id="appPanel" class="panel hidden">
-      <div class="row"><div><p class="eyebrow">YOUR PRIVATE SPACE</p><h1 id="hello">Welcome</h1></div><button id="logout" class="ghost">Log out</button></div>
-      <div class="card"><h2>Connect with your partner</h2><p>Create a six-digit invitation code to share with your partner.</p><button id="createInvite" class="primary">Create invitation code</button><div id="inviteResult" class="invite"></div>
-      <hr><p>Have a code from your partner?</p><div class="joinrow"><input id="joinCode" inputmode="numeric" maxlength="6" placeholder="6-digit code"><button id="joinInvite" class="secondary">Join</button></div></div>
-      <div class="card"><h2>Your couple space</h2><p id="coupleStatus">You have not connected a partner yet.</p></div>
-    </section>
-    <footer>COUPLE ZONE • 18+ • Consent, respect and privacy first</footer>
-  </main>
-  <script src="app.js"></script>
+<header class="topbar"><a class="brand" href="#home"><span class="brandmark">♡</span> COUPLE <b>ZONE</b></a><button id="langBtn" class="textbtn">Kiswahili</button></header>
+<main>
+<section id="authPanel" class="auth-wrap">
+ <div class="hero"><span class="eyebrow">A LITTLE CLOSER, EVERY DAY</span><h1 id="welcome">Grow closer,<br><em>together.</em></h1><p>Make time for connection, laughter and meaningful moments.</p><div class="hero-orbit">♡</div></div>
+ <div class="auth-card"><div class="tabs"><button id="loginTab" class="tab active">Log in</button><button id="signupTab" class="tab">Create account</button></div>
+ <form id="authForm"><label id="nameWrap" class="hidden">Your name<input id="displayName" type="text" placeholder="Your name"></label><label>Email address<input id="email" type="email" required placeholder="you@example.com" autocomplete="email"></label><label>Password<input id="password" type="password" required minlength="6" placeholder="At least 6 characters"></label><label id="adultWrap" class="checkrow hidden"><input id="adult" type="checkbox"> I confirm I am 18 or older.</label><button id="authSubmit" class="primary full" type="submit">Log in</button><p id="authMsg" class="message" aria-live="polite"></p></form></div>
+</section>
+<section id="appPanel" class="hidden">
+ <div class="welcome-row"><div><span class="eyebrow" id="todayLabel">YOUR SHARED SPACE</span><h1 id="hello">Welcome</h1><p id="coupleStatus">Your connection starts here.</p></div><div class="avatar">♡</div></div>
+ <section id="homeView" class="view active-view">
+  <div class="feature-card"><div><span class="eyebrow light">MAKE A MOMENT</span><h2 id="surpriseTitle">A little surprise?</h2><p id="surpriseText">Let us choose something lovely for you two.</p><button id="surpriseBtn" class="lightbtn">Surprise us ↗</button></div><div class="feature-heart">♡</div></div>
+  <div class="section-head"><div><span class="eyebrow">DISCOVER TOGETHER</span><h2 id="homeExploreTitle">Explore activities</h2></div><button class="linkbtn" data-go="explore">See all</button></div>
+  <div id="homeCategories" class="category-grid"></div>
+  <div class="section-head"><div><span class="eyebrow">A GOOD PLACE TO START</span><h2 id="featuredTitle">Picked for you</h2></div></div><div id="homeActivities" class="activity-grid"></div>
+  <div class="connect-card"><div><h3 id="connectTitle">Your couple space</h3><p id="connectHint">Invite your partner to join you.</p><div id="inviteResult" class="invite-result"></div></div><div class="connect-actions"><button id="createInvite" class="primary">Create invite</button><div class="join-row"><input id="joinCode" inputmode="numeric" maxlength="6" placeholder="6-digit code"><button id="joinInvite" class="secondary">Join</button></div></div></div>
+ </section>
+ <section id="exploreView" class="view hidden"><div class="page-heading"><span class="eyebrow">FIND YOUR NEXT MOMENT</span><h2 id="exploreHeading">Explore</h2><p id="exploreSub">Small moments can make a big difference.</p></div><input id="searchInput" class="search" type="search" placeholder="Search activities…"><div id="exploreCategories" class="chips"></div><div id="exploreActivities" class="activity-grid"></div></section>
+ <section id="favoritesView" class="view hidden"><div class="page-heading"><span class="eyebrow">SAVED WITH LOVE</span><h2 id="favoritesHeading">Favorites</h2><p id="favoritesSub">Your saved moments, all in one place.</p></div><div id="favoriteActivities" class="activity-grid"></div></section>
+ <section id="profileView" class="view hidden"><div class="page-heading"><span class="eyebrow">YOUR ACCOUNT</span><h2 id="profileHeading">Profile</h2></div><div class="profile-card"><div class="avatar large">♡</div><h3 id="profileName">Your profile</h3><p id="profileEmail"></p><div class="profile-line"><span>Couple Zone</span><span class="status-pill">18+ space</span></div><button id="logout" class="secondary full">Log out</button></div></section>
+</section>
+</main>
+<nav id="bottomNav" class="bottom-nav hidden"><button class="navitem selected" data-view="home"><span>⌂</span><small id="navHome">Home</small></button><button class="navitem" data-view="explore"><span>♡</span><small id="navExplore">Explore</small></button><button class="navitem" data-view="favorites"><span>☆</span><small id="navFavorites">Favorites</small></button><button class="navitem" data-view="profile"><span>☻</span><small id="navProfile">Profile</small></button></nav>
+<div id="activityModal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card"><button id="closeModal" class="close">×</button><span class="eyebrow" id="modalCategory"></span><h2 id="modalTitle"></h2><p id="modalDescription"></p><div class="modal-meta"><span id="modalDuration"></span><span>♡ Couple activity</span></div><button id="modalFavorite" class="primary full">☆ Save to favorites</button></div></div>
 </body></html>
