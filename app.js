@@ -163,6 +163,27 @@ function bindCards(root){root.querySelectorAll('[data-open]').forEach(el=>el.onc
 function renderAll(){let cats=categorize();$('homeCategories').innerHTML=cats.map(c=>`<button class="category-card" data-category="${c[2]}"><span>${c[1]}</span><b>${sw?c[0]:c[2]}</b><small>${sw?'Gundua mawazo':'Explore ideas'}</small></button>`).join('');$('homeCategories').querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{activeCategory=b.dataset.category;go('explore');renderExplore()});$('homeActivities').innerHTML=activities.slice(0,3).map(card).join('');bindCards($('homeActivities'));renderExplore();renderFavorites();$('surpriseTitle').textContent=sw?'Mshangao mdogo?':'A little surprise?';$('surpriseText').textContent=sw?'Tuchague jambo zuri kwa ajili yenu wawili.':'Let us choose something lovely for you two.';$('surpriseBtn').textContent=sw?'Tushangaze ↗':'Surprise us ↗';$('homeExploreTitle').textContent=sw?'Gundua shughuli':'Explore activities';$('featuredTitle').textContent=sw?'Mapendekezo kwenu':'Picked for you';$('connectTitle').textContent=sw?'Nafasi yenu ya wawili':'Your couple space';$('connectHint').textContent=sw?'Mwalike mwenza wako ajiunge.':'Invite your partner to join you.';$('exploreHeading').textContent=sw?'Gundua':'Explore';$('exploreSub').textContent=sw?'Muda mfupi pamoja huleta tofauti kubwa.':'Small moments can make a big difference.';$('favoritesHeading').textContent=sw?'Vilivyohifadhiwa':'Favorites';$('favoritesSub').textContent=sw?'Shughuli mlizohifadhi.':'Your saved moments, all in one place.';$('profileHeading').textContent=sw?'Wasifu':'Profile';$('navHome').textContent=sw?'Nyumbani':'Home';$('navExplore').textContent=sw?'Gundua':'Explore';$('navFavorites').textContent=sw?'Vipendwa':'Favorites';$('navProfile').textContent=sw?'Wasifu':'Profile';$('createInvite').textContent=sw?'Tengeneza mwaliko':'Create invite';$('joinInvite').textContent=sw?'Jiunge':'Join';$('joinCode').placeholder=sw?'Namba ya tarakimu 6':'6-digit code'}
 function categorize(){
   const icons = {
+    'Romance':'❤️',
+    'Deep Conversations':'🗣️',
+    'Fun Games':'🎲',
+    'Couple Challenges':'🏆',
+    'Love & Appreciation':'💕',
+    'Long Distance':'🌍',
+    'Relationship Growth':'🌱',
+    'Surprise Activities':'🎁'
+  };
+
+  return [...new Set(
+    activities
+      .map(a => String(a.category || '').trim())
+      .filter(Boolean)
+  )].map(c => [
+    catName(c),
+    icons[c] || '✨',
+    c
+  ]);
+}
+  const icons = {
     'Activities':'🎯',
     'Communication':'💬',
     'Couple Challenges':'🏆',
