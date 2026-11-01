@@ -1,216 +1,34 @@
-(()=>{
-const cfg=window.COUPLE_ZONE_CONFIG||{},$=id=>document.getElementById(id);let db,user,mode='login',sw=false,currentView='home',activeCategory='All',currentActivity=null;
-const categories=[['Romance','💕','Romantic'],['Date night','🌙','Date Night'],['Communication','💬','Connection'],['Challenges','🎯','Challenges'],['Intimacy','🫶','Intimacy'],['Fun games','🎲','Games'],['Surprises','🎁','Surprises']];
-const seeds=[
-['A memory lane evening','Jioni ya kumbukumbu','Share three favourite memories from your relationship.','Shirikishaneni kumbukumbu tatu mnazozipenda za uhusiano wenu.','Romance',20],['Write a love note','Andika ujumbe wa upendo','Write a short note saying what you appreciate about your partner.','Andika ujumbe mfupi unaoeleza unachokithamini kwa mwenza wako.','Romance',15],['Slow dance at home','Chezeni dansi taratibu nyumbani','Play a favourite song and enjoy a slow dance together.','Wekeni wimbo mnaoupenda na kucheza dansi taratibu pamoja.','Romance',10],['Sunset walk','Matembezi ya machweo','Take a relaxed walk and watch the sunset together.','Tembeeni kwa utulivu na kutazama machweo pamoja.','Date Night',30],['Plan a dream date','Pangeni miadi ya ndoto','Take turns describing your perfect date and plan one.','Zamu kwa zamu elezeni miadi yenu bora na mpange mmoja.','Date Night',20],['Cook together','Pikeni pamoja','Choose a simple recipe and prepare it as a team.','Chagueni mapishi rahisi na yaandaeni pamoja.','Date Night',45],['Three things I admire','Mambo matatu ninayoyapenda','Tell each other three qualities you admire.','Kila mmoja amwambie mwenzake sifa tatu anazozipenda.','Connection',10],['Listen without interrupting','Sikilizeni bila kukatizana','Take turns sharing how your week has felt. Listen fully.','Zamu kwa zamu elezeni wiki yenu ilivyokuwa. Sikilizeni kwa makini.','Connection',15],['Ask a meaningful question','Ulizeni swali lenye maana','Ask: what makes you feel most supported by me?','Ulizeni: ni jambo gani linalokufanya uhisi nina kukuunga mkono?','Connection',10],['Compliment challenge','Changamoto ya pongezi','Give each other five sincere compliments.','Peaneni pongezi tano za dhati.','Challenges',8],['No-phone hour','Saa bila simu','Put devices away and spend one hour together.','Wekeni simu pembeni na tumieni saa moja pamoja.','Challenges',60],['Build a playlist','Tengenezeni playlist','Choose five songs that remind you of each other.','Chagueni nyimbo tano zinazowakumbusha kila mmoja.','Challenges',20],['Create a comfort ritual','Tengenezeni desturi ya faraja','Agree on a small daily ritual that helps you reconnect.','Kubalianeni desturi ndogo ya kila siku ya kuwafanya muwe karibu.','Intimacy',15],['Ask about boundaries','Zungumzieni mipaka','Talk respectfully about what makes each of you comfortable.','Zungumzieni kwa heshima mambo yanayowafanya mjisikie salama.','Intimacy',20],['A relaxing hand massage','Kusagana mikono kwa utulivu','Offer a gentle hand massage, only if both are comfortable.','Mpe mwenzako massage ya mikono kwa upole ikiwa wote mmeridhia.','Intimacy',10],['Two truths and a dream','Kweli mbili na ndoto moja','Each share two true things and one dream for the future.','Kila mmoja aseme mambo mawili ya kweli na ndoto moja ya baadaye.','Games',15],['Guess the favourite','Kisia anachokipenda','Take turns guessing each other’s favourite things.','Zamu kwa zamu kisianeni vitu anavyopenda kila mmoja.','Games',10],['Draw each other','Choreni picha za kila mmoja','Draw a playful portrait of each other, no artistic skill needed.','Choreni picha za kuchekesha za kila mmoja; si lazima mjue kuchora.','Games',20],['Secret kind gesture','Tendo la siri la wema','Do one thoughtful thing for your partner without telling them.','Mfanyie mwenza wako jambo la kumfurahisha kwa siri.','Surprises',15],['Surprise breakfast','Kifungua kinywa cha kushtukiza','Prepare a simple breakfast or tea for your partner.','Andaa kifungua kinywa rahisi au chai kwa ajili ya mwenza wako.','Surprises',20],['A gratitude jar','Kopo la shukrani','Write little things you are grateful for and save them in a jar.','Andikeni vitu vidogo mnavyovishukuru na vihifadhi kwenye kopo.','Surprises',15]
-];
-let activities=seeds.map((x,i)=>({id:'local-'+i,title_en:x[0],title_sw:x[1],description_en:x[2],description_sw:x[3],category:x[4],duration_minutes:x[5]}));
-const favKey=()=>`cz_favs_${user?.id||'guest'}`,getFavs=()=>JSON.parse(localStorage.getItem(favKey())||'[]'),setFavs=a=>localStorage.setItem(favKey(),JSON.stringify(a));
-function say(t){$('authMsg').textContent=t}function setMode(m){mode=m;$('loginTab').classList.toggle('active',m==='login');$('signupTab').classList.toggle('active',m==='signup');$('nameWrap').classList.toggle('hidden',m!=='signup');$('adultWrap').classList.toggle('hidden',m!=='signup');$('authSubmit').textContent=m==='login'?(sw?'Ingia':'Log in'):(sw?'Jisajili':'Create account');say('')}
-// First activate Login and Create Account buttons
-$('loginTab').onclick = () => setMode('login');
-$('signupTab').onclick = () => setMode('signup');
-
-// Check Supabase configuration
-if (
-  !cfg.supabaseUrl ||
-  !cfg.supabasePublishableKey ||
-  cfg.supabaseUrl.includes('PASTE_') ||
-  cfg.supabasePublishableKey.includes('PASTE_')
-) {
-  say('Setup required: check config.js');
-  $('authSubmit').disabled = true;
-  return;
-}
-
-// Check Supabase library
-if (!window.supabase || !window.supabase.createClient) {
-  say('Supabase failed to load. Refresh the page.');
-  $('authSubmit').disabled = true;
-  return;
-}
-
-// Initialize Supabase
-db = window.supabase.createClient(
-  cfg.supabaseUrl,
-  cfg.supabasePublishableKey
-);
-
-// Handle Login and Create Account
-$('authForm').onsubmit = async (e) => {
-  e.preventDefault();
-
-  const button = $('authSubmit');
-  button.disabled = true;
-
-  try {
-    say(sw ? 'Subiri kidogo...' : 'Please wait...');
-
-    const email = $('email').value.trim();
-    const password = $('password').value;
-
-    if (mode === 'signup' && !$('adult').checked) {
-      say('Please confirm you are 18 or older.');
-      return;
-    }
-
-    let result;
-
-    if (mode === 'signup') {
-      result = await db.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            display_name: $('displayName').value.trim(),
-            is_adult: true
-          }
-        }
-      });
-    } else {
-      result = await db.auth.signInWithPassword({
-        email,
-        password
-      });
-    }
-
-    if (result.error) {
-      say(result.error.message);
-      return;
-    }
-
-    if (mode === 'signup' && !result.data.session) {
-      say(
-        'Account created. Please confirm your email before logging in.'
-      );
-      return;
-    }
-
-    user = result.data.user;
-
-    await ensureProfile();
-    await showApp();
-
-  } catch (error) {
-    console.error('Authentication error:', error);
-    say(error.message || 'Something went wrong. Please try again.');
-  } finally {
-    button.disabled = false;
-  }
-};
-db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);
-$('loginTab').onclick=()=>setMode('login');$('signupTab').onclick=()=>setMode('signup');
-$('langBtn').onclick=()=>{sw=!sw;$('langBtn').textContent=sw?'English':'Kiswahili';$('welcome').innerHTML=sw?'Karibuni,<br><em>mjenge ukaribu.</em>':'Grow closer,<br><em>together.</em>';setMode(mode);renderAll()};
-$('authForm').onsubmit=async e=>{e.preventDefault();say(sw?'Subiri kidogo…':'Please wait…');const email=$('email').value.trim(),password=$('password').value;if(mode==='signup'&&!$('adult').checked){say('Please confirm you are 18 or older.');return}let r=mode==='signup'?await db.auth.signUp({email,password,options:{data:{display_name:$('displayName').value.trim(),is_adult:true}}}):await db.auth.signInWithPassword({email,password});if(r.error){say(r.error.message);return}if(mode==='signup'&&!r.data.session){say(sw?'Akaunti imetengenezwa. Zima uthibitisho wa email au thibitisha email kisha ingia.':'Account created. Confirm your email if required, then log in.');return}user=r.data.user;await ensureProfile();showApp()};
-async function ensureProfile(){if(!user)return;const {error}=await db.from('profiles').upsert({id:user.id,display_name:user.user_metadata?.display_name||user.email,is_adult:true},{onConflict:'id'});if(error)console.warn(error.message)}
-async function showApp(){$('authPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');$('bottomNav').classList.remove('hidden');$('hello').textContent=(sw?'Karibu, ':'Welcome, ')+(user.user_metadata?.display_name||user.email?.split('@')[0]||'');$('profileName').textContent=user.user_metadata?.display_name||'Couple Zone member';$('profileEmail').textContent=user.email||'';await refreshCouple();await loadActivities();renderAll();go('home')}
-async function refreshCouple(){let {data,error}=await db.from('couple_members').select('couple_id').eq('user_id',user.id).limit(1).maybeSingle();$('coupleStatus').textContent=error?(sw?'Imeshindikana kupakia taarifa za kuunganishwa.':'Could not load couple connection.'):data?(sw?'Mmeunganishwa kwenye nafasi yenu ya wawili.':'You are connected to a couple space.'):(sw?'Bado hujaunganisha mwenza wako.':'You have not connected a partner yet.')
-async function loadActivities(){
-  try {
-    const { data, error } = await db
-      .from('activities')
-      .select('*')
-      .range(0, 999);
-
-    if (error) {
-      console.error('Activities error:', error);
-      return;
-    }
-
-    if (Array.isArray(data)) {
-      activities = data.map((a, i) => ({
-        ...a,
-        id: a.id || 'db-' + i,
-        title_en: a.title_en || a.title || 'Activity',
-        title_sw: a.title_sw || a.title_en || 'Shughuli',
-        description_en: a.description_en || a.description || '',
-        description_sw: a.description_sw || a.description_en || '',
-        category: a.category || 'Romance',
-        duration_minutes: 15
-      }));
-    }
-
-  } catch (error) {
-    console.error(error);
-  }
-}
-function title(a){
-  return sw ? a.title_sw : a.title_en;
-}
-
-function desc(a){
-  return sw ? a.description_sw : a.description_en;
-}
-
-function catName(c){
-  const names = {
-    'Activities': sw ? 'Shughuli' : 'Activities',
-    'Communication': sw ? 'Mawasiliano' : 'Communication',
-    'Couple Challenges': sw ? 'Changamoto za Wapenzi' : 'Couple Challenges',
-    'Deep Conversations': sw ? 'Mazungumzo ya Kina' : 'Deep Conversations',
-    'Fun Games': sw ? 'Michezo ya Kufurahisha' : 'Fun Games',
-    'Future': sw ? 'Mustakabali' : 'Future',
-    'Love & Appreciation': sw ? 'Upendo na Shukrani' : 'Love & Appreciation',
-    'Memories': sw ? 'Kumbukumbu' : 'Memories',
-    'Romance': sw ? 'Mapenzi' : 'Romance'
-  };
-
-  return names[c] || c;
-}
-function card(a){let fav=getFavs().includes(String(a.id));return `<article class="activity-card" data-open="${String(a.id).replace(/"/g,'&quot;')}"><div class="activity-top"><span>${catName(a.category)}</span><button class="heart-btn" data-fav="${String(a.id).replace(/"/g,'&quot;')}" aria-label="Favorite">${fav?'♥':'♡'}</button></div><h3>${escapeHtml(title(a))}</h3><p>${escapeHtml(desc(a))}</p><span class="activity-time">◷ ${a.duration_minutes||15} ${sw?'dakika':'min'}</span></article>`}
-function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function bindCards(root){root.querySelectorAll('[data-open]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-fav]'))return;openActivity(el.dataset.open)});root.querySelectorAll('[data-fav]').forEach(b=>b.onclick=e=>{e.stopPropagation();toggleFav(b.dataset.fav)})}
-function renderAll(){let cats=categorize();$('homeCategories').innerHTML=cats.map(c=>`<button class="category-card" data-category="${c[2]}"><span>${c[1]}</span><b>${sw?c[0]:c[2]}</b><small>${sw?'Gundua mawazo':'Explore ideas'}</small></button>`).join('');$('homeCategories').querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{activeCategory=b.dataset.category;go('explore');renderExplore()});$('homeActivities').innerHTML=activities.slice(0,3).map(card).join('');bindCards($('homeActivities'));renderExplore();renderFavorites();$('surpriseTitle').textContent=sw?'Mshangao mdogo?':'A little surprise?';$('surpriseText').textContent=sw?'Tuchague jambo zuri kwa ajili yenu wawili.':'Let us choose something lovely for you two.';$('surpriseBtn').textContent=sw?'Tushangaze ↗':'Surprise us ↗';$('homeExploreTitle').textContent=sw?'Gundua shughuli':'Explore activities';$('featuredTitle').textContent=sw?'Mapendekezo kwenu':'Picked for you';$('connectTitle').textContent=sw?'Nafasi yenu ya wawili':'Your couple space';$('connectHint').textContent=sw?'Mwalike mwenza wako ajiunge.':'Invite your partner to join you.';$('exploreHeading').textContent=sw?'Gundua':'Explore';$('exploreSub').textContent=sw?'Muda mfupi pamoja huleta tofauti kubwa.':'Small moments can make a big difference.';$('favoritesHeading').textContent=sw?'Vilivyohifadhiwa':'Favorites';$('favoritesSub').textContent=sw?'Shughuli mlizohifadhi.':'Your saved moments, all in one place.';$('profileHeading').textContent=sw?'Wasifu':'Profile';$('navHome').textContent=sw?'Nyumbani':'Home';$('navExplore').textContent=sw?'Gundua':'Explore';$('navFavorites').textContent=sw?'Vipendwa':'Favorites';$('navProfile').textContent=sw?'Wasifu':'Profile';$('createInvite').textContent=sw?'Tengeneza mwaliko':'Create invite';$('joinInvite').textContent=sw?'Jiunge':'Join';$('joinCode').placeholder=sw?'Namba ya tarakimu 6':'6-digit code'}
-function categorize(){
-  const icons = {
-    'Romance':'❤️',
-    'Deep Conversations':'🗣️',
-    'Fun Games':'🎲',
-    'Couple Challenges':'🏆',
-    'Love & Appreciation':'💕',
-    'Long Distance':'🌍',
-    'Relationship Growth':'🌱',
-    'Surprise Activities':'🎁'
-  };
-
-  return [...new Set(
-    activities
-      .map(a => String(a.category || '').trim())
-      .filter(Boolean)
-  )].map(c => [
-    catName(c),
-    icons[c] || '✨',
-    c
-  ]);
-}
-  const icons = {
-    'Activities':'🎯',
-    'Communication':'💬',
-    'Couple Challenges':'🏆',
-    'Deep Conversations':'🗣️',
-    'Fun Games':'🎲',
-    'Future':'🌟',
-    'Love & Appreciation':'💕',
-    'Memories':'📸',
-    'Romance':'❤️'
-  };
-
-  return [...new Set(
-    activities
-      .map(a => String(a.category || '').trim())
-      .filter(Boolean)
-  )].map(c => [
-    catName(c),
-    icons[c] || '✨',
-    c
-  ]);
-}
-function renderFavorites(){let ids=getFavs(),list=activities.filter(a=>ids.includes(String(a.id)));$('favoriteActivities').innerHTML=list.length?list.map(card).join(''):`<p class="message">${sw?'Bado hujahifadhi shughuli.':'You have not saved any activities yet.'}</p>`;bindCards($('favoriteActivities'))}
-function toggleFav(id){let a=getFavs();a=a.includes(String(id))?a.filter(x=>x!==String(id)):[...a,String(id)];setFavs(a);renderAll()}
-function openActivity(id){currentActivity=activities.find(a=>String(a.id)===String(id));if(!currentActivity)return;$('modalCategory').textContent=catName(currentActivity.category);$('modalTitle').textContent=title(currentActivity);$('modalDescription').textContent=desc(currentActivity);$('modalDuration').textContent=`◷ ${currentActivity.duration_minutes||15} ${sw?'dakika':'minutes'}`;$('modalFavorite').textContent=getFavs().includes(String(id))?(sw?'♥ Imehifadhiwa':'♥ Saved to favorites'):(sw?'☆ Hifadhi kwenye vipendwa':'☆ Save to favorites');$('activityModal').classList.remove('hidden')}
-$('modalFavorite').onclick=()=>{if(currentActivity)toggleFav(String(currentActivity.id));if(currentActivity)openActivity(currentActivity.id)};$('closeModal').onclick=()=>$('activityModal').classList.add('hidden');$('activityModal').onclick=e=>{if(e.target.id==='activityModal')$('activityModal').classList.add('hidden')};$('searchInput').oninput=renderExplore;
-function go(v){currentView=v;document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));$(v+'View').classList.remove('hidden');document.querySelectorAll('.navitem').forEach(x=>x.classList.toggle('selected',x.dataset.view===v));if(v==='favorites')renderFavorites();if(v==='explore')renderExplore()}
-document.querySelectorAll('.navitem').forEach(b=>b.onclick=()=>go(b.dataset.view));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));$('surpriseBtn').onclick=()=>{let a=activities[Math.floor(Math.random()*activities.length)];openActivity(a.id)};
-$('createInvite').onclick=async()=>{let b=$('createInvite');b.disabled=true;$('inviteResult').textContent=sw?'Inatengeneza…':'Creating…';let {data,error}=await db.rpc('create_couple_invite');b.disabled=false;if(error){$('inviteResult').textContent=error.message;return}$('inviteResult').textContent=data};$('joinInvite').onclick=async()=>{let code=$('joinCode').value.trim();if(!/^\d{6}$/.test(code)){alert(sw?'Weka namba ya tarakimu 6.':'Enter a six-digit code.');return}let {error}=await db.rpc('join_couple_invite',{invite_code:code});if(error){alert(error.message);return}alert(sw?'Mmeunganishwa!':'You joined the couple space!');refreshCouple()};$('logout').onclick=async()=>{await db.auth.signOut();user=null;$('appPanel').classList.add('hidden');$('bottomNav').classList.add('hidden');$('authPanel').classList.remove('hidden');setMode('login')};
-db.auth.getSession().then(async({data})=>{if(data.session){user=data.session.user;await ensureProfile();showApp()}});
+(() => {
+'use strict';
+const cfg=window.COUPLE_ZONE_CONFIG||{}, $=id=>document.getElementById(id);
+let db,user,mode='login',sw=false,activeCategory='All',activities=[],currentActivity=null;
+const icons={'Romance':'❤️','Deep Conversations':'🗣️','Fun Games':'🎲','Couple Challenges':'🏆','Love & Appreciation':'💕','Long Distance':'🌍','Relationship Growth':'🌱','Surprise Activities':'🎁'};
+const t=(en,swText)=>sw?swText:en;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function msg(s,error=false){$('authMsg').textContent=s;$('authMsg').style.color=error?'#ff9caa':'';}
+function setMode(m){mode=m;$('loginTab').classList.toggle('active',m==='login');$('signupTab').classList.toggle('active',m==='signup');$('nameWrap').classList.toggle('hidden',m!=='signup');$('adultWrap').classList.toggle('hidden',m!=='signup');$('displayName').required=m==='signup';$('adult').required=m==='signup';$('authSubmit').textContent=t(m==='login'?'Log in':'Create account',m==='login'?'Ingia':'Fungua akaunti');msg('');}
+function showView(v){['home','explore','favorites','profile'].forEach(x=>{$(x+'View').classList.toggle('hidden',x!==v);$(x+'View').classList.toggle('active-view',x===v);});document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('selected',b.dataset.view===v));if(v==='explore')renderExplore();if(v==='favorites')renderFavorites();}
+async function ensureProfile(){const name=user.user_metadata?.display_name||(user.email||'').split('@')[0];const {error}=await db.from('profiles').upsert({id:user.id,display_name:name,email:user.email},{onConflict:'id'});if(error)console.warn(error.message);}
+async function refreshCouple(){const {data,error}=await db.from('couple_members').select('couple_id').eq('user_id',user.id).limit(1);$('coupleStatus').textContent=!error&&data?.length?t('Your couple space is connected.','Nafasi yenu imeunganishwa.'):t('You can enjoy Couple Zone without connecting a partner. Inviting someone is optional.','Unaweza kutumia Couple Zone bila kuunganisha mwenza. Kumwalika ni hiari.');}
+async function loadActivities(){const {data,error}=await db.from('activities').select('*').range(0,999);if(error){console.error(error);activities=[];return;}activities=data||[];}
+async function showApp(u){user=u;$('authPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');$('bottomNav').classList.remove('hidden');$('hello').textContent=t('Welcome','Karibu')+(u.user_metadata?.display_name?', '+u.user_metadata.display_name:'');$('profileName').textContent=u.user_metadata?.display_name||t('Your profile','Wasifu wako');$('profileEmail').textContent=u.email||'';await ensureProfile();await refreshCouple();await loadActivities();renderAll();showView('home');}
+function favs(){try{return JSON.parse(localStorage.getItem('cz_favs_'+user.id)||'[]');}catch{return [];}}
+function favorite(id){return favs().includes(String(id));}
+function card(a){const title=sw?(a.title_sw||a.title_en):(a.title_en||a.title_sw),desc=sw?(a.description_sw||a.description_en):(a.description_en||a.description_sw);return `<article class="activity-card" data-activity="${esc(a.id)}"><div class="activity-top"><span>${icons[a.category]||'✨'} ${esc(a.category)}</span><button class="heart-btn" data-fav="${esc(a.id)}">${favorite(a.id)?'♥':'♡'}</button></div><h3>${esc(title)}</h3><p>${esc(desc)}</p><span class="activity-time">◷ 15 min</span></article>`;}
+function cats(){return [...new Set(activities.map(a=>String(a.category||'').trim()).filter(Boolean))];}
+function renderCategories(){$('homeCategories').innerHTML=cats().map(c=>`<button class="category-card" data-category="${esc(c)}"><span>${icons[c]||'✨'}</span><b>${esc(c)}</b><small>${activities.filter(a=>a.category===c).length} activities</small></button>`).join('');}
+function renderHome(){renderCategories();$('homeActivities').innerHTML=activities.slice(0,6).map(card).join('');}
+function renderExplore(){const cs=['All',...cats()];$('exploreCategories').innerHTML=cs.map(c=>`<button class="chip ${activeCategory===c?'active':''}" data-category="${esc(c)}">${c==='All'?t('All','Zote'):esc(c)}</button>`).join('');const q=$('searchInput').value.toLowerCase().trim();const list=activities.filter(a=>{const hay=[a.title_en,a.title_sw,a.description_en,a.description_sw,a.category].join(' ').toLowerCase();return(activeCategory==='All'||a.category===activeCategory)&&(!q||hay.includes(q));});$('exploreActivities').innerHTML=list.length?list.map(card).join(''):`<p class="message">${t('No activities found.','Hakuna shughuli zilizopatikana.')}</p>`;}
+function renderFavorites(){const list=activities.filter(a=>favorite(a.id));$('favoriteActivities').innerHTML=list.length?list.map(card).join(''):`<p class="message">${t('You have not saved any activities yet.','Bado hujahifadhi shughuli yoyote.')}</p>`;}
+function renderAll(){renderHome();renderExplore();renderFavorites();}
+function toggleFav(id){const key='cz_favs_'+user.id,v=String(id),list=favs(),next=list.includes(v)?list.filter(x=>x!==v):[...list,v];localStorage.setItem(key,JSON.stringify(next));renderAll();if(currentActivity&&String(currentActivity.id)===v)updateModal();}
+function openActivity(id){const a=activities.find(x=>String(x.id)===String(id));if(!a)return;currentActivity=a;$('modalCategory').textContent=(icons[a.category]||'✨')+' '+a.category;$('modalTitle').textContent=sw?(a.title_sw||a.title_en):(a.title_en||a.title_sw);$('modalDescription').textContent=sw?(a.description_sw||a.description_en):(a.description_en||a.description_sw);$('modalDuration').textContent='◷ 15 min';updateModal();$('activityModal').classList.remove('hidden');}
+function updateModal(){$('modalFavorite').textContent=favorite(currentActivity.id)?t('♥ Remove from favorites','♥ Ondoa kwenye vipendwa'):t('☆ Save to favorites','☆ Hifadhi kwenye vipendwa');}
+async function authSubmit(e){e.preventDefault();$('authSubmit').disabled=true;msg(t('Please wait…','Tafadhali subiri…'));try{const email=$('email').value.trim(),password=$('password').value;if(mode==='signup'){if(!$('adult').checked)throw Error(t('Please confirm you are 18 or older.','Thibitisha kuwa una miaka 18 au zaidi.'));const {data,error}=await db.auth.signUp({email,password,options:{data:{display_name:$('displayName').value.trim()}}});if(error)throw error;if(data.session)await showApp(data.user);else msg(t('Account created. Please log in.','Akaunti imefunguliwa. Tafadhali ingia.'));}else{const {data,error}=await db.auth.signInWithPassword({email,password});if(error)throw error;await showApp(data.user);}}catch(e){msg(e.message||'Something went wrong.',true);}finally{$('authSubmit').disabled=false;}}
+async function createInvite(){$('inviteResult').textContent=t('Creating…','Inatengeneza…');const {data,error}=await db.rpc('create_couple_invite');if(error){$('inviteResult').textContent=error.message;return;}const row=Array.isArray(data)?data[0]:data;$('inviteResult').textContent=String(row?.invite_code||row?.code||row||'Invite created');}
+async function joinInvite(){const code=$('joinCode').value.trim();if(!code)return;const {error}=await db.rpc('join_couple_invite',{invite_code:code});$('inviteResult').textContent=error?error.message:t('Partner connected!','Mmeunganishwa!');if(!error)await refreshCouple();}
+async function logout(){await db.auth.signOut();user=null;$('appPanel').classList.add('hidden');$('bottomNav').classList.add('hidden');$('authPanel').classList.remove('hidden');$('authForm').reset();setMode('login');}
+function language(){sw=!sw;$('langBtn').textContent=sw?'English':'Kiswahili';$('exploreHeading').textContent=t('Explore','Chunguza');$('exploreSub').textContent=t('Small moments can make a big difference.','Matukio madogo yanaweza kuleta tofauti kubwa.');$('favoritesHeading').textContent=t('Favorites','Vipendwa');$('favoritesSub').textContent=t('Your saved moments, all in one place.','Shughuli ulizohifadhi zipo hapa.');$('profileHeading').textContent=t('Profile','Wasifu');$('navHome').textContent=t('Home','Nyumbani');$('navExplore').textContent=t('Explore','Chunguza');$('navFavorites').textContent=t('Favorites','Vipendwa');$('navProfile').textContent=t('Profile','Wasifu');$('surpriseTitle').textContent=t('A little surprise?','Mshangao mdogo?');$('surpriseText').textContent=t('Let us choose something lovely for you two.','Tukuchagulie jambo zuri la kufanya pamoja.');$('surpriseBtn').textContent=t('Surprise us ↗','Tushangaze ↗');$('homeExploreTitle').textContent=t('Explore activities','Chunguza shughuli');$('featuredTitle').textContent=t('Picked for you','Tumekuchagulia');$('connectTitle').textContent=t('Your couple space','Nafasi yenu ya wapenzi');$('connectHint').textContent=t('Invite your partner to join you.','Mwalike mwenza wako ajiunge.');$('createInvite').textContent=t('Create invite','Tengeneza mwaliko');$('joinInvite').textContent=t('Join','Jiunge');renderAll();}
+function init(){$('loginTab').onclick=()=>setMode('login');$('signupTab').onclick=()=>setMode('signup');$('authForm').onsubmit=authSubmit;$('langBtn').onclick=language;$('logout').onclick=logout;$('createInvite').onclick=createInvite;$('joinInvite').onclick=joinInvite;$('searchInput').oninput=renderExplore;$('surpriseBtn').onclick=()=>{if(activities.length)openActivity(activities[Math.floor(Math.random()*activities.length)].id);};$('closeModal').onclick=()=>$('activityModal').classList.add('hidden');$('activityModal').onclick=e=>{if(e.target===$('activityModal'))$('activityModal').classList.add('hidden');};$('modalFavorite').onclick=()=>currentActivity&&toggleFav(currentActivity.id);$('bottomNav').onclick=e=>{const b=e.target.closest('[data-view]');if(b)showView(b.dataset.view);};document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)showView(go.dataset.go);const c=e.target.closest('[data-category]');if(c){activeCategory=c.dataset.category;showView('explore');renderExplore();}const f=e.target.closest('[data-fav]');if(f){e.stopPropagation();toggleFav(f.dataset.fav);return;}const a=e.target.closest('[data-activity]');if(a)openActivity(a.dataset.activity);});setMode('login');if(!cfg.supabaseUrl||!cfg.supabasePublishableKey||!window.supabase){msg('Configuration error: check config.js.',true);return;}db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);db.auth.getSession().then(({data,error})=>{if(error)console.error(error);if(data?.session?.user)showApp(data.session.user);});}
+document.addEventListener('DOMContentLoaded',init);
 })();
