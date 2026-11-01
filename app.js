@@ -7,7 +7,97 @@ const seeds=[
 let activities=seeds.map((x,i)=>({id:'local-'+i,title_en:x[0],title_sw:x[1],description_en:x[2],description_sw:x[3],category:x[4],duration_minutes:x[5]}));
 const favKey=()=>`cz_favs_${user?.id||'guest'}`,getFavs=()=>JSON.parse(localStorage.getItem(favKey())||'[]'),setFavs=a=>localStorage.setItem(favKey(),JSON.stringify(a));
 function say(t){$('authMsg').textContent=t}function setMode(m){mode=m;$('loginTab').classList.toggle('active',m==='login');$('signupTab').classList.toggle('active',m==='signup');$('nameWrap').classList.toggle('hidden',m!=='signup');$('adultWrap').classList.toggle('hidden',m!=='signup');$('authSubmit').textContent=m==='login'?(sw?'Ingia':'Log in'):(sw?'Jisajili':'Create account');say('')}
-if(!cfg.supabaseUrl||!cfg.supabasePublishableKey||cfg.supabaseUrl.includes('PASTE_')||cfg.supabasePublishableKey.includes('PASTE_')){say('Setup required: check config.js');$('authSubmit').disabled=true;return}
+// First activate Login and Create Account buttons
+$('loginTab').onclick = () => setMode('login');
+$('signupTab').onclick = () => setMode('signup');
+
+// Check Supabase configuration
+if (
+  !cfg.supabaseUrl ||
+  !cfg.supabasePublishableKey ||
+  cfg.supabaseUrl.includes('PASTE_') ||
+  cfg.supabasePublishableKey.includes('PASTE_')
+) {
+  say('Setup required: check config.js');
+  $('authSubmit').disabled = true;
+  return;
+}
+
+// Check Supabase library
+if (!window.supabase || !window.supabase.createClient) {
+  say('Supabase failed to load. Refresh the page.');
+  $('authSubmit').disabled = true;
+  return;
+}
+
+// Initialize Supabase
+db = window.supabase.createClient(
+  cfg.supabaseUrl,
+  cfg.supabasePublishableKey
+);
+
+// Handle Login and Create Account
+$('authForm').onsubmit = async (e) => {
+  e.preventDefault();
+
+  const button = $('authSubmit');
+  button.disabled = true;
+
+  try {
+    say(sw ? 'Subiri kidogo...' : 'Please wait...');
+
+    const email = $('email').value.trim();
+    const password = $('password').value;
+
+    if (mode === 'signup' && !$('adult').checked) {
+      say('Please confirm you are 18 or older.');
+      return;
+    }
+
+    let result;
+
+    if (mode === 'signup') {
+      result = await db.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: $('displayName').value.trim(),
+            is_adult: true
+          }
+        }
+      });
+    } else {
+      result = await db.auth.signInWithPassword({
+        email,
+        password
+      });
+    }
+
+    if (result.error) {
+      say(result.error.message);
+      return;
+    }
+
+    if (mode === 'signup' && !result.data.session) {
+      say(
+        'Account created. Please confirm your email before logging in.'
+      );
+      return;
+    }
+
+    user = result.data.user;
+
+    await ensureProfile();
+    await showApp();
+
+  } catch (error) {
+    console.error('Authentication error:', error);
+    say(error.message || 'Something went wrong. Please try again.');
+  } finally {
+    button.disabled = false;
+  }
+};
 db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);
 $('loginTab').onclick=()=>setMode('login');$('signupTab').onclick=()=>setMode('signup');
 $('langBtn').onclick=()=>{sw=!sw;$('langBtn').textContent=sw?'English':'Kiswahili';$('welcome').innerHTML=sw?'Karibuni,<br><em>mjenge ukaribu.</em>':'Grow closer,<br><em>together.</em>';setMode(mode);renderAll()};
