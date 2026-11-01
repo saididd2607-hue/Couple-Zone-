@@ -126,7 +126,7 @@ async function loadActivities(){
         description_en: a.description_en || a.description || '',
         description_sw: a.description_sw || a.description_en || '',
         category: a.category || 'Romance',
-        duration_minutes: a.duration_minutes || 15
+        duration_minutes: 15
       }));
     }
 
