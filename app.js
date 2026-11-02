@@ -282,7 +282,11 @@ function language(){sw=!sw;$('langBtn').textContent=sw?'English':'Kiswahili';$('
 function init(){
   $('loginTab').onclick=()=>setMode('login');
   $('signupTab').onclick=()=>setMode('signup');
-  $('authForm').onsubmit=authSubmit;
+  
+  $('authForm').onsubmit=(e)=>{
+  e.preventDefault();
+  msg('FORM INAFANYA KAZI!', false);
+};
 
   $('langBtn').onclick=language;
   $('logout').onclick=logout;
