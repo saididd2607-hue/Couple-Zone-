@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#170d2b"><title>Couple Zone</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script><script defer src="app.js"></script>
+</head>
+<body>
+<img
+  src="https://whlzsdxaypyixltqdwnb.supabase.co/storage/v1/object/public/couple-zone-images/romance/file_0000000004808211afa37b4ed42f458f.png"
+  alt="Couple Zone"
+  style="width:100%; max-height:220px; object-fit:contain; display:block; margin:auto;"
+>
+  
+<header class="topbar"><a class="brand" href="#home"><span class="brandmark">♡</span> COUPLE <b>ZONE</b></a><button id="langBtn" class="textbtn">Kiswahili</button></header>
+<main>
+<section id="authPanel" class="auth-wrap">
+ <div class="hero"><span class="eyebrow">A LITTLE CLOSER, EVERY DAY</span><h1 id="welcome">Grow closer,<br><em>together.</em></h1><p>Make time for connection, laughter and meaningful moments.</p><div class="hero-orbit">♡</div></div>
+ <div class="auth-card"><div class="tabs"><button id="loginTab" class="tab active">Log in</button><button id="signupTab" class="tab">Create account</button></div>
+ <form id="authForm"><label id="nameWrap" class="hidden">Your name<input id="displayName" type="text" placeholder="Your name"></label><label>Email address<input id="email" type="email" required placeholder="you@example.com" autocomplete="email"></label><label>Password<input id="password" type="password" required minlength="6" placeholder="At least 6 characters"></label><label id="adultWrap" class="checkrow hidden"><input id="adult" type="checkbox"> I confirm I am 18 or older.</label><button id="authSubmit" class="primary full" type="submit">Log in</button><p id="authMsg" class="message" aria-live="polite"></p></form></div>
+</section>
+<section id="appPanel" class="hidden">
+ <div class="welcome-row"><div><span class="eyebrow" id="todayLabel">YOUR COUPLE ZONE SPACE</span><h1 id="hello">Welcome</h1><p id="coupleStatus">Your connection starts here.</p></div><div class="avatar">♡</div></div>
+ <section id="homeView" class="view active-view">
+  <div class="feature-card"><div><span class="eyebrow light">MAKE A MOMENT</span><h2 id="surpriseTitle">A little surprise?</h2><p id="surpriseText">Let us choose something lovely for you two.</p><button id="surpriseBtn" class="lightbtn">Surprise us ↗</button></div><div class="feature-heart">♡</div></div>
+  <div class="section-head"><div><span class="eyebrow">DISCOVER TOGETHER</span><h2 id="homeExploreTitle">Explore activities</h2></div><button class="linkbtn" data-go="explore">See all</button></div>
+  <div id="homeCategories" class="category-grid"></div>
+  <div class="section-head"><div><span class="eyebrow">A GOOD PLACE TO START</span><h2 id="featuredTitle">Picked for you</h2></div></div><div id="homeActivities" class="activity-grid"></div>
+  <div class="connect-card"><div><h3 id="connectTitle">Your couple space</h3><p id="connectHint">Invite your partner to join you.</p><div id="inviteResult" class="invite-result"></div></div><div class="connect-actions"><button id="createInvite" class="primary">Create invite</button><div class="join-row"><input id="joinCode" inputmode="numeric" maxlength="6" placeholder="6-digit code"><button id="joinInvite" class="secondary">Join</button></div></div></div>
+ </section>
+ <section id="surpriseView" class="view hidden">
+  <div class="surprise-page">
+
+    <button id="surpriseBack" class="secondary">
+      ← Back
+    </button>
+
+    <h2>💜 Surprise Us</h2>
+    <p>Discover a new romantic experience together.</p>
+
+    <div class="surprise-stage">
+      <img id="surpriseImage" class="surprise-image"
+           src="" alt="Romantic style">
+    </div>
+
+    <div class="surprise-details">
+      <span id="surpriseCategory"></span>
+      <h2 id="surpriseStyleTitle"></h2>
+      <p id="surpriseStyleDescription"></p>
+      <p id="surpriseStyleGuide"></p>
+    </div>
+
+    <div class="surprise-actions">
+      <button id="styleFavoriteBtn">♡ Add to Favorites</button>
+      <button id="nextSurpriseBtn">🎲 Next Surprise</button>
+    </div>
+
+    <h3>❤️ My Favorite Styles</h3>
+    <div id="styleFavorites" class="style-favorites-grid"></div>
+  </div>
+</section>
+
+<section id="exploreView" class="view hidden">
+   <div class="page-heading">
+    <span class="eyebrow">FIND YOUR NEXT MOMENT</span>
+    <h2 id="exploreHeading">Explore</h2>
+    <p id="exploreSub">Small moments can make a big difference.</p>
+   </div>
+   <input id="searchInput" class="search" type="search" placeholder="Search activities…">
+   <div id="exploreCategories" class="chips"></div>
+   <div id="exploreActivities" class="activity-grid"></div>
+  </section>
+ <section id="favoritesView" class="view hidden"><div class="page-heading"><span class="eyebrow">SAVED WITH LOVE</span><h2 id="favoritesHeading">Favorites</h2><p id="favoritesSub">Your saved moments, all in one place.</p></div><div id="favoriteActivities" class="activity-grid"></div></section>
+ <section id="profileView" class="view hidden"><div class="page-heading"><span class="eyebrow">YOUR ACCOUNT</span><h2 id="profileHeading">Profile</h2></div><div class="profile-card"><div class="avatar large">♡</div><h3 id="profileName">Your profile</h3><p id="profileEmail"></p><div class="profile-line"><span>Couple Zone</span><span class="status-pill">18+ space</span></div><button id="logout" class="secondary full">Log out</button></div></section>
+</section>
+</main>
+<nav id="bottomNav" class="bottom-nav hidden"><button class="navitem selected" data-view="home"><span>⌂</span><small id="navHome">Home</small></button><button class="navitem" data-view="explore"><span>♡</span><small id="navExplore">Explore</small></button><button class="navitem" data-view="favorites"><span>☆</span><small id="navFavorites">Favorites</small></button><button class="navitem" data-view="profile"><span>☻</span><small id="navProfile">Profile</small></button></nav>
+<div id="activityModal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card"><button id="closeModal" class="close">×</button><span class="eyebrow" id="modalCategory"></span><h2 id="modalTitle"></h2><p id="modalDescription"></p><div class="modal-meta"><span id="modalDuration"></span><span>♡ Couple activity</span></div><button id="modalFavorite" class="primary full">☆ Save to favorites</button></div></div>
+</body></html>
