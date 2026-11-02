@@ -194,7 +194,7 @@ function init(){
 };
   $('surpriseBack').onclick=()=>showView('home');
   $('nextSurpriseBtn').onclick=showRandomStyle;
-
+  $('styleFavoriteBtn').onclick=toggleStyleFavorite;
   $('closeModal').onclick=()=>$('activityModal').classList.add('hidden');
 
   $('activityModal').onclick=e=>{
