@@ -179,8 +179,6 @@ function init(){
   $('loginTab').onclick=()=>setMode('login');
   $('signupTab').onclick=()=>setMode('signup');
   
-  alert('INIT INAFANYA KAZI');
-  
   $('authForm').onsubmit=(e)=>{
   e.preventDefault();
   msg('FORM INAFANYA KAZI!', false);
