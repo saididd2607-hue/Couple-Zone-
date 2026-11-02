@@ -359,4 +359,5 @@ function init(){
     if(data?.session?.user) showApp(data.session.user);
   });
 }
+init();
 })();
