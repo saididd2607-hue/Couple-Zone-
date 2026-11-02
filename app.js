@@ -13,6 +13,52 @@ async function ensureProfile(){const name=user.user_metadata?.display_name||(use
 async function refreshCouple(){const {data,error}=await db.from('couple_members').select('couple_id').eq('user_id',user.id).limit(1);$('coupleStatus').textContent=!error&&data?.length?t('Your couple space is connected.','Nafasi yenu imeunganishwa.'):t('You can enjoy Couple Zone without connecting a partner. Inviting someone is optional.','Unaweza kutumia Couple Zone bila kuunganisha mwenza. Kumwalika ni hiari.');}
 async function loadActivities(){const {data,error}=await db.from('activities').select('*').range(0,999);if(error){console.error(error);activities=[];return;}activities=data||[];}
 async function showApp(u){user=u;$('authPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');$('bottomNav').classList.remove('hidden');$('hello').textContent=t('Welcome','Karibu')+(u.user_metadata?.display_name?', '+u.user_metadata.display_name:'');$('profileName').textContent=u.user_metadata?.display_name||t('Your profile','Wasifu wako');$('profileEmail').textContent=u.email||'';await ensureProfile();await refreshCouple();await loadActivities();renderAll();showView('home');}
+const surpriseStyles = [
+  {
+    id: 'romantic-connection',
+    category: 'Romantic Connection',
+    icon: '❤️',
+    title: 'Romantic Connection',
+    titleSw: 'Muunganiko wa Kimapenzi',
+    description: 'Spend quality time together, share loving words and enjoy each other’s company.',
+    descriptionSw: 'Tumieni muda pamoja, semeni maneno ya upendo na kufurahia uwepo wenu.',
+    guide: 'Take turns sharing three things you appreciate about each other.',
+    guideSw: 'Zamu kwa zamu, taja mambo matatu unayoyathamini kwa mwenza wako.'
+  },
+  {
+    id: 'couple-massage',
+    category: 'Couple Massage',
+    icon: '🌹',
+    title: 'Relaxing Couple Massage',
+    titleSw: 'Massage ya Wapenzi',
+    description: 'Create a calm atmosphere and help each other relax.',
+    descriptionSw: 'Tengenezeni mazingira tulivu na kusaidiana kupumzika.',
+    guide: 'Use gentle movements and ask your partner what feels comfortable.',
+    guideSw: 'Fanyeni kwa upole na muulizane kama kila mmoja anajisikia vizuri.'
+  },
+  {
+    id: 'romantic-mood',
+    category: 'Romantic Mood',
+    icon: '🕯️',
+    title: 'Candlelight Moments',
+    titleSw: 'Muda wa Mshumaa',
+    description: 'Enjoy a peaceful romantic evening together.',
+    descriptionSw: 'Furahieni jioni tulivu yenye mahaba pamoja.',
+    guide: 'Play your favourite music and talk about your dreams.',
+    guideSw: 'Wekeni muziki mnaoupenda na zungumzieni ndoto zenu.'
+  },
+  {
+    id: 'intimacy',
+    category: 'Intimacy Styles',
+    icon: '💞',
+    title: 'Gentle Intimacy',
+    titleSw: 'Ukaribu wa Upendo',
+    description: 'Build closeness through affection, trust and communication.',
+    descriptionSw: 'Jengeni ukaribu kupitia mapenzi, kuaminiana na mawasiliano.',
+    guide: 'Talk openly about boundaries and what makes you both comfortable.',
+    guideSw: 'Zungumzieni mipaka yenu na mambo yanayowafanya mjisikie salama.'
+  }
+];
 function favs(){try{return JSON.parse(localStorage.getItem('cz_favs_'+user.id)||'[]');}catch{return [];}}
 function favorite(id){return favs().includes(String(id));}
 function card(a){const title=sw?(a.title_sw||a.title_en):(a.title_en||a.title_sw),desc=sw?(a.description_sw||a.description_en):(a.description_en||a.description_sw);return `<article class="activity-card" data-activity="${esc(a.id)}"><div class="activity-top"><span>${icons[a.category]||'✨'} ${esc(a.category)}</span><button class="heart-btn" data-fav="${esc(a.id)}">${favorite(a.id)?'♥':'♡'}</button></div><h3>${esc(title)}</h3><p>${esc(desc)}</p><span class="activity-time">◷ 15 min</span></article>`;}
