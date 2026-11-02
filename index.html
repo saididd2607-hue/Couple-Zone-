@@ -30,7 +30,41 @@
   <div class="section-head"><div><span class="eyebrow">A GOOD PLACE TO START</span><h2 id="featuredTitle">Picked for you</h2></div></div><div id="homeActivities" class="activity-grid"></div>
   <div class="connect-card"><div><h3 id="connectTitle">Your couple space</h3><p id="connectHint">Invite your partner to join you.</p><div id="inviteResult" class="invite-result"></div></div><div class="connect-actions"><button id="createInvite" class="primary">Create invite</button><div class="join-row"><input id="joinCode" inputmode="numeric" maxlength="6" placeholder="6-digit code"><button id="joinInvite" class="secondary">Join</button></div></div></div>
  </section>
- <section id="exploreView" class="view hidden"><div class="page-heading"><span class="eyebrow">FIND YOUR NEXT MOMENT</span><h2 id="exploreHeading">Explore</h2><p id="exploreSub">Small moments can make a big difference.</p></div><input id="searchInput" class="search" type="search" placeholder="Search activities…"><div id="exploreCategories" class="chips"></div><div id="exploreActivities" class="activity-grid"></div></section>
+ <section id="surpriseView" class="view hidden">
+  <div class="surprise-page">
+
+    <button id="surpriseBack" class="secondary">
+      ← Back
+    </button>
+
+    <h2>💜 Surprise Us</h2>
+    <p>Discover a new romantic experience together.</p>
+
+    <div class="surprise-stage">
+      <img id="surpriseImage" class="surprise-image"
+           src="" alt="Romantic style">
+    </div>
+
+    <div class="surprise-details">
+      <span id="surpriseCategory"></span>
+      <h2 id="surpriseStyleTitle"></h2>
+      <p id="surpriseStyleDescription"></p>
+      <p id="surpriseStyleGuide"></p>
+    </div>
+
+    <div class="surprise-actions">
+      <button id="styleFavoriteBtn">♡ Add to Favorites</button>
+      <button id="nextSurpriseBtn">🎲 Next Surprise</button>
+    </div>
+
+    <h3>❤️ My Favorite Styles</h3>
+    <div id="styleFavorites" class="style-favorites-grid"></div>
+  </div>
+</section>
+
+<section id="exploreView" class="view hidden">
+  </div>
+</section>div class="page-heading"><span class="eyebrow">FIND YOUR NEXT MOMENT</span><h2 id="exploreHeading">Explore</h2><p id="exploreSub">Small moments can make a big difference.</p></div><input id="searchInput" class="search" type="search" placeholder="Search activities…"><div id="exploreCategories" class="chips"></div><div id="exploreActivities" class="activity-grid"></div></section>
  <section id="favoritesView" class="view hidden"><div class="page-heading"><span class="eyebrow">SAVED WITH LOVE</span><h2 id="favoritesHeading">Favorites</h2><p id="favoritesSub">Your saved moments, all in one place.</p></div><div id="favoriteActivities" class="activity-grid"></div></section>
  <section id="profileView" class="view hidden"><div class="page-heading"><span class="eyebrow">YOUR ACCOUNT</span><h2 id="profileHeading">Profile</h2></div><div class="profile-card"><div class="avatar large">♡</div><h3 id="profileName">Your profile</h3><p id="profileEmail"></p><div class="profile-line"><span>Couple Zone</span><span class="status-pill">18+ space</span></div><button id="logout" class="secondary full">Log out</button></div></section>
 </section>
