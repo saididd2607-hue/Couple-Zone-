@@ -61,6 +61,97 @@ const surpriseStyles = [
 ];
 function favs(){try{return JSON.parse(localStorage.getItem('cz_favs_'+user.id)||'[]');}catch{return [];}}
 function favorite(id){return favs().includes(String(id));}
+let currentSurprise = null;
+
+function showRandomStyle(){
+  if(!surpriseStyles.length) return;
+
+  let next;
+
+  do {
+    next = surpriseStyles[
+      Math.floor(Math.random() * surpriseStyles.length)
+    ];
+  } while (
+    surpriseStyles.length > 1 &&
+    currentSurprise &&
+    next.id === currentSurprise.id
+  );
+
+  currentSurprise = next;
+
+  $('surpriseCategory').textContent = next.category;
+  $('surpriseStyleTitle').textContent =
+    sw ? next.titleSw : next.title;
+
+  $('surpriseStyleDescription').textContent =
+    sw ? next.descriptionSw : next.description;
+
+  $('surpriseStyleGuide').textContent =
+    sw ? next.guideSw : next.guide;
+
+  $('surpriseImage').src = '';
+  $('surpriseImage').alt = next.title;
+  $('surpriseImage').src = createStyleImage(next.icon);
+
+  $('styleFavoriteBtn').textContent =
+    isStyleFavorite(next.id)
+      ? '❤️ Remove from Favorites'
+      : '♡ Add to Favorites';
+}
+
+function createStyleImage(icon){function styleFavs(){
+  try{
+    return JSON.parse(
+      localStorage.getItem('cz_style_favs_'+user.id)||'[]'
+    );
+  }catch{
+    return [];
+  }
+}
+
+function isStyleFavorite(id){
+  return styleFavs().includes(String(id));
+}
+
+function toggleStyleFavorite(){
+  if(!currentSurprise) return;
+
+  let saved = styleFavs();
+  const id = String(currentSurprise.id);
+
+  if(saved.includes(id)){
+    saved = saved.filter(x=>x!==id);
+  }else{
+    saved.push(id);
+  }
+
+  localStorage.setItem(
+    'cz_style_favs_'+user.id,
+    JSON.stringify(saved)
+  );
+
+  $('styleFavoriteBtn').textContent =
+    isStyleFavorite(id)
+      ? '❤️ Remove from Favorites'
+      : '♡ Add to Favorites';
+}
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#7b55a6"/>
+          <stop offset="100%" stop-color="#f18bb7"/>
+        </linearGradient>
+      </defs>
+      <rect width="500" height="500" rx="250" fill="url(#bg)"/>
+      <text x="250" y="285" text-anchor="middle"
+        font-size="150">${icon}</text>
+    </svg>`;
+
+  return 'data:image/svg+xml;charset=UTF-8,' +
+    encodeURIComponent(svg);
+}
 function card(a){const title=sw?(a.title_sw||a.title_en):(a.title_en||a.title_sw),desc=sw?(a.description_sw||a.description_en):(a.description_en||a.description_sw);return `<article class="activity-card" data-activity="${esc(a.id)}"><div class="activity-top"><span>${icons[a.category]||'✨'} ${esc(a.category)}</span><button class="heart-btn" data-fav="${esc(a.id)}">${favorite(a.id)?'♥':'♡'}</button></div><h3>${esc(title)}</h3><p>${esc(desc)}</p><span class="activity-time">◷ 15 min</span></article>`;}
 function cats(){return [...new Set(activities.map(a=>String(a.category||'').trim()).filter(Boolean))];}
 function renderCategories(){$('homeCategories').innerHTML=cats().map(c=>`<button class="category-card" data-category="${esc(c)}"><span>${icons[c]||'✨'}</span><b>${esc(c)}</b><small>${activities.filter(a=>a.category===c).length} activities</small></button>`).join('');}
