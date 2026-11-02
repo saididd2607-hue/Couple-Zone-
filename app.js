@@ -131,6 +131,115 @@ function toggleStyleFavorite(){
     JSON.stringify(saved)
   );
 
+  renderStyleFavorites();
+
+  $('styleFavoriteBtn').textContent =
+    isStyleFavorite(id)
+      ? '❤️ Remove from Favorites'
+      : '♡ Add to Favorites';
+}
+
+function renderStyleFavorites(){
+  const box = $('styleFavorites');
+  if(!box) return;
+
+  const saved = styleFavs();
+
+  const favorites = surpriseStyles.filter(
+    style => saved.includes(String(style.id))
+  );
+
+  if(!favorites.length){
+    box.innerHTML = '<p>No favorite styles yet 💜</p>';
+    return;
+  }
+
+  box.innerHTML = favorites.map(style => `
+    <div class="style-favorite-card">
+      <img src="${createStyleImage(style.icon)}" alt="${style.title}">
+      <h4>${sw ? style.titleSw : style.title}</h4>
+      <button onclick="removeStyleFavorite('${style.id}')">
+        ❤️ Remove
+      </button>
+    </div>
+  `).join('');
+}
+
+function removeStyleFavorite(id){
+  const saved = styleFavs().filter(x => x !== String(id));
+
+  localStorage.setItem(
+    'cz_style_favs_'+user.id,
+    JSON.stringify(saved)
+  );
+
+  renderStyleFavorites();
+
+  if(currentSurprise){
+    $('styleFavoriteBtn').textContent =
+      isStyleFavorite(currentSurprise.id)
+        ? '❤️ Remove from Favorites'
+        : '♡ Add to Favorites';
+  }
+}
+  const box = $('styleFavorites');
+  if(!box) return;
+
+  const saved = styleFavs();
+
+  const favorites = surpriseStyles.filter(
+    style => saved.includes(String(style.id))
+  );
+
+  if(!favorites.length){
+    box.innerHTML = '<p>No favorite styles yet 💜</p>';
+    return;
+  }
+
+  box.innerHTML = favorites.map(style => `
+    <div class="style-favorite-card">
+      <img src="${createStyleImage(style.icon)}" alt="${style.title}">
+      <h4>${sw ? style.titleSw : style.title}</h4>
+      <button onclick="removeStyleFavorite('${style.id}')">
+        ❤️ Remove
+      </button>
+    </div>
+  `).join('');
+}
+
+function removeStyleFavorite(id){
+  const saved = styleFavs().filter(x => x !== String(id));
+
+  localStorage.setItem(
+    'cz_style_favs_'+user.id,
+    JSON.stringify(saved)
+  );
+
+  renderStyleFavorites();
+
+  if(currentSurprise){
+    $('styleFavoriteBtn').textContent =
+      isStyleFavorite(currentSurprise.id)
+        ? '❤️ Remove from Favorites'
+        : '♡ Add to Favorites';
+  }
+}
+  if(!currentSurprise) return;
+
+  let saved = styleFavs();
+  const id = String(currentSurprise.id);
+
+  if(saved.includes(id)){
+    saved = saved.filter(x=>x!==id);
+  }else{
+    saved.push(id);
+  }
+
+  localStorage.setItem(
+    'cz_style_favs_'+user.id,
+    JSON.stringify(saved)
+  );
+
   $('styleFavoriteBtn').textContent =
     isStyleFavorite(id)
       ? '❤️ Remove from Favorites'
