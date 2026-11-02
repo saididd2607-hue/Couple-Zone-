@@ -279,34 +279,31 @@ async function joinInvite(){const code=$('joinCode').value.trim();if(!code)retur
 async function logout(){await db.auth.signOut();user=null;$('appPanel').classList.add('hidden');$('bottomNav').classList.add('hidden');$('authPanel').classList.remove('hidden');$('authForm').reset();setMode('login');}
 function language(){sw=!sw;$('langBtn').textContent=sw?'English':'Kiswahili';$('exploreHeading').textContent=t('Explore','Chunguza');$('exploreSub').textContent=t('Small moments can make a big difference.','Matukio madogo yanaweza kuleta tofauti kubwa.');$('favoritesHeading').textContent=t('Favorites','Vipendwa');$('favoritesSub').textContent=t('Your saved moments, all in one 
                                                                                                                                                                                                                                                                                                                                                            .','Shughuli ulizohifadhi zipo hapa.');$('profileHeading').textContent=t('Profile','Wasifu');$('navHome').textContent=t('Home','Nyumbani');$('navExplore').textContent=t('Explore','Chunguza');$('navFavorites').textContent=t('Favorites','Vipendwa');$('navProfile').textContent=t('Profile','Wasifu');$('surpriseTitle').textContent=t('A little surprise?','Mshangao mdogo?');$('surpriseText').textContent=t('Let us choose something lovely for you two.','Tukuchagulie jambo zuri la kufanya pamoja.');$('surpriseBtn').textContent=t('Surprise us ↗','Tushangaze ↗');$('homeExploreTitle').textContent=t('Explore activities','Chunguza shughuli');$('featuredTitle').textContent=t('Picked for you','Tumekuchagulia');$('connectTitle').textContent=t('Your couple space','Nafasi yenu ya wapenzi');$('connectHint').textContent=t('Invite your partner to join you.','Mwalike mwenza wako ajiunge.');$('createInvite').textContent=t('Create invite','Tengeneza mwaliko');$('joinInvite').textContent=t('Join','Jiunge');renderAll();}
-function init(){$('loginTab').onclick=()=>setMode('login');$('signupTab').onclick=()=>setMode('signup');$(
-  $('surpriseBtn').onclick=()=>{
-  showView('surprise');
-  showRandomStyle();
-};$('searchInput').oninput=renderExplore;
-$('surpriseBtn').onclick=()=>{
-  showView('surprise');
-  showRandomStyle();
-};
-$('closeModal').onclick=()=>$('activityModal').classList.add('hidden');.onclick=()=>$('activityModal').classList.add('hidden');$('activityModal').onclick=e=>{if(e.target===$('activityModal'))$('activityModal').classList.add('hidden');};$('modalFavorite').onclick=()=>currentActivity&&toggleFav(currentActivity.id);$('bottomNav').onclick=e=>{const b=e.target.closest('[data-view]');if(b)showView(b.dataset.view);};document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)showView(go.dataset.go);const c=e.target.closest('[data-category]');if(c){activeCategory=c.dataset.category;showView('explore');renderExplore();}const f=e.target.closest('[data-fav]');if(f){e.stopPropagation();toggleFav(f.dataset.fav);return;}const a=e.target.closest('[data-activity]');if(a)openActivity(a.dataset.activity);});setMode('login');if(!cfg.supabaseUrl||!cfg.supabasePublishableKey||!window.supabase){msg('Configuration error: check config.js.',true);return;}db=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey);db.auth.getSession().then(({data,error})=>{if(error)console.error(error);if(data?.session?.user)showApp(data.session.user);});}
 function init(){
   $('loginTab').onclick=()=>setMode('login');
   $('signupTab').onclick=()=>setMode('signup');
   $('authForm').onsubmit=authSubmit;
+
   $('langBtn').onclick=language;
   $('logout').onclick=logout;
+
   $('createInvite').onclick=createInvite;
   $('joinInvite').onclick=joinInvite;
 
   $('searchInput').oninput=renderExplore;
+
   $('surpriseBtn').onclick=()=>{
-  showView('surprise');
-  showRandomStyle();
-};
+    showView('surprise');
+    showRandomStyle();
+  };
+
   $('surpriseBack').onclick=()=>showView('home');
   $('nextSurpriseBtn').onclick=showRandomStyle;
   $('styleFavoriteBtn').onclick=toggleStyleFavorite;
-  $('closeModal').onclick=()=>$('activityModal').classList.add('hidden');
+
+  $('closeModal').onclick=()=>{
+    $('activityModal').classList.add('hidden');
+  };
 
   $('activityModal').onclick=e=>{
     if(e.target===$('activityModal')){
@@ -314,16 +311,18 @@ function init(){
     }
   };
 
-  $('modalFavorite').onclick=()=>currentActivity&&toggleFav(currentActivity.id);
+  $('modalFavorite').onclick=()=>{
+    if(currentActivity) toggleFav(currentActivity.id);
+  };
 
   $('bottomNav').onclick=e=>{
     const b=e.target.closest('[data-view]');
-    if(b)showView(b.dataset.view);
+    if(b) showView(b.dataset.view);
   };
 
   document.addEventListener('click',e=>{
     const go=e.target.closest('[data-go]');
-    if(go)showView(go.dataset.go);
+    if(go) showView(go.dataset.go);
 
     const c=e.target.closest('[data-category]');
     if(c){
@@ -340,7 +339,7 @@ function init(){
     }
 
     const a=e.target.closest('[data-activity]');
-    if(a)openActivity(a.dataset.activity);
+    if(a) openActivity(a.dataset.activity);
   });
 
   setMode('login');
@@ -356,8 +355,8 @@ function init(){
   );
 
   db.auth.getSession().then(({data,error})=>{
-    if(error)console.error(error);
-    if(data?.session?.user)showApp(data.session.user);
+    if(error) console.error(error);
+    if(data?.session?.user) showApp(data.session.user);
   });
-        }
+}
 })();
