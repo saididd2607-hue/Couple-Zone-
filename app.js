@@ -98,6 +98,8 @@ function showRandomStyle(){
     isStyleFavorite(next.id)
       ? '❤️ Remove from Favorites'
       : '♡ Add to Favorites';
+  
+  renderStyleFavorites();
 }
 
 function createStyleImage(icon){function styleFavs(){
