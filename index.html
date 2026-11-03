@@ -3,23 +3,19 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#170d2b"><title>Couple Zone</title>
+<meta name="description" content="Couple Zone - activities, conversations and surprises for couples.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%92%9C%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script><script defer src="app.js"></script>
 </head>
 <body>
-<img
-  src="https://whlzsdxaypyixltqdwnb.supabase.co/storage/v1/object/public/couple-zone-images/romance/file_0000000004808211afa37b4ed42f458f.png"
-  alt="Couple Zone"
-  style="width:100%; max-height:220px; object-fit:contain; display:block; margin:auto;"
->
-  
-<header class="topbar"><a class="brand" href="#home"><span class="brandmark">♡</span> COUPLE <b>ZONE</b></a><button id="langBtn" class="textbtn">Kiswahili</button></header>
+<header class="topbar"><a class="brand" href="#home" id="brandLink"><span class="brandmark">♡</span> COUPLE <b>ZONE</b></a><button id="langBtn" class="textbtn">Kiswahili</button></header>
 <main>
 <section id="authPanel" class="auth-wrap">
- <div class="hero"><span class="eyebrow">A LITTLE CLOSER, EVERY DAY</span><h1 id="welcome">Grow closer,<br><em>together.</em></h1><p>Make time for connection, laughter and meaningful moments.</p><div class="hero-orbit">♡</div></div>
+ <div class="hero"><img class="hero-banner" src="https://whlzsdxaypyixltqdwnb.supabase.co/storage/v1/object/public/couple-zone-images/romance/file_0000000004808211afa37b4ed42f458f.png" alt="Couple Zone"><span class="eyebrow" id="heroEyebrow">A LITTLE CLOSER, EVERY DAY</span><h1 id="welcome">Grow closer,<br><em>together.</em></h1><p id="heroText">Make time for connection, laughter and meaningful moments.</p><div class="hero-orbit">♡</div></div>
  <div class="auth-card"><div class="tabs"><button id="loginTab" class="tab active">Log in</button><button id="signupTab" class="tab">Create account</button></div>
- <form id="authForm"><label id="nameWrap" class="hidden">Your name<input id="displayName" type="text" placeholder="Your name"></label><label>Email address<input id="email" type="email" required placeholder="you@example.com" autocomplete="email"></label><label>Password<input id="password" type="password" required minlength="6" placeholder="At least 6 characters"></label><label id="adultWrap" class="checkrow hidden"><input id="adult" type="checkbox"> I confirm I am 18 or older.</label><button id="authSubmit" class="primary full" type="submit">Log in</button><p id="authMsg" class="message" aria-live="polite"></p></form></div>
+ <form id="authForm"><label id="nameWrap" class="hidden">Your name<input id="displayName" type="text" placeholder="Your name"></label><label>Email address<input id="email" type="email" required placeholder="you@example.com" autocomplete="email"></label><label>Password<span class="pw-wrap"><input id="password" type="password" required minlength="6" placeholder="At least 6 characters"><button type="button" id="togglePw" class="pw-toggle" aria-label="Show password">👁</button></span></label><label id="adultWrap" class="checkrow hidden"><input id="adult" type="checkbox"> I confirm I am 18 or older.</label><button id="authSubmit" class="primary full" type="submit">Log in</button><p id="forgotWrap" class="forgot"><button type="button" id="forgotBtn" class="textbtn">Forgot password?</button></p><p id="authMsg" class="message" aria-live="polite"></p></form></div>
 </section>
 <section id="appPanel" class="hidden">
  <div class="welcome-row"><div><span class="eyebrow" id="todayLabel">YOUR COUPLE ZONE SPACE</span><h1 id="hello">Welcome</h1><p id="coupleStatus">Your connection starts here.</p></div><div class="avatar">♡</div></div>
@@ -33,12 +29,12 @@
  <section id="surpriseView" class="view hidden">
   <div class="surprise-page">
 
-    <button id="surpriseBack" class="secondary">
+    <button id="surpriseBack" class="secondary" type="button">
       ← Back
     </button>
 
-    <h2>💜 Surprise Us</h2>
-    <p>Discover a new romantic experience together.</p>
+    <h2 id="surpriseHeading">💜 Surprise Us</h2>
+    <p id="surpriseSub">Discover a new romantic experience together.</p>
 
     <div class="surprise-stage">
       <img id="surpriseImage" class="surprise-image"
@@ -57,7 +53,7 @@
       <button id="nextSurpriseBtn">🎲 Next Surprise</button>
     </div>
 
-    <h3>❤️ My Favorite Styles</h3>
+    <h3 id="surpriseFavTitle">❤️ My Favorite Styles</h3>
     <div id="styleFavorites" class="style-favorites-grid"></div>
   </div>
 </section>
@@ -73,9 +69,10 @@
    <div id="exploreActivities" class="activity-grid"></div>
   </section>
  <section id="favoritesView" class="view hidden"><div class="page-heading"><span class="eyebrow">SAVED WITH LOVE</span><h2 id="favoritesHeading">Favorites</h2><p id="favoritesSub">Your saved moments, all in one place.</p></div><div id="favoriteActivities" class="activity-grid"></div></section>
- <section id="profileView" class="view hidden"><div class="page-heading"><span class="eyebrow">YOUR ACCOUNT</span><h2 id="profileHeading">Profile</h2></div><div class="profile-card"><div class="avatar large">♡</div><h3 id="profileName">Your profile</h3><p id="profileEmail"></p><div class="profile-line"><span>Couple Zone</span><span class="status-pill">18+ space</span></div><button id="logout" class="secondary full">Log out</button></div></section>
+ <section id="bedAdminView" class="view hidden"><button id="bedAdminBack" class="secondary" type="button">← Back</button><div class="page-heading"><span class="eyebrow">ADMIN</span><h2>Bedroom Time names</h2><p>Andika jina chini ya kila picha. Linahifadhiwa ukitoka kwenye kisanduku.</p></div><div id="bedAdminList" class="admin-list"></div></section>
+ <section id="profileView" class="view hidden"><div class="page-heading"><span class="eyebrow">YOUR ACCOUNT</span><h2 id="profileHeading">Profile</h2></div><div class="profile-card"><div class="avatar large">♡</div><h3 id="profileName">Your profile</h3><p id="profileEmail"></p><div class="profile-line"><span>Couple Zone</span><span class="status-pill">18+ space</span></div><button id="openBedAdmin" class="secondary full hidden" type="button" style="margin-bottom:10px">✏️ Edit Bedroom names</button><button id="logout" class="secondary full">Log out</button></div></section>
 </section>
 </main>
 <nav id="bottomNav" class="bottom-nav hidden"><button class="navitem selected" data-view="home"><span>⌂</span><small id="navHome">Home</small></button><button class="navitem" data-view="explore"><span>♡</span><small id="navExplore">Explore</small></button><button class="navitem" data-view="favorites"><span>☆</span><small id="navFavorites">Favorites</small></button><button class="navitem" data-view="profile"><span>☻</span><small id="navProfile">Profile</small></button></nav>
-<div id="activityModal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card"><button id="closeModal" class="close">×</button><span class="eyebrow" id="modalCategory"></span><h2 id="modalTitle"></h2><p id="modalDescription"></p><div class="modal-meta"><span id="modalDuration"></span><span>♡ Couple activity</span></div><button id="modalFavorite" class="primary full">☆ Save to favorites</button></div></div>
+<div id="activityModal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card"><button id="closeModal" class="close">×</button><img id="modalImage" class="modal-image hidden" alt=""><span class="eyebrow" id="modalCategory"></span><h2 id="modalTitle"></h2><p id="modalDescription"></p><div class="modal-meta"><span id="modalDuration"></span><span>♡ Couple activity</span></div><button id="modalFavorite" class="primary full">☆ Save to favorites</button></div></div>
 </body></html>
