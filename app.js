@@ -12,8 +12,62 @@ function showView(v){['home','explore','favorites','profile','surprise'].forEach
 async function ensureProfile(){const name=user.user_metadata?.display_name||(user.email||'').split('@')[0];const {error}=await db.from('profiles').upsert({id:user.id,display_name:name,email:user.email},{onConflict:'id'});if(error)console.warn(error.message);}
 async function refreshCouple(){const {data,error}=await db.from('couple_members').select('couple_id').eq('user_id',user.id).limit(1);$('coupleStatus').textContent=!error&&data?.length?t('Your couple space is connected.','Nafasi yenu imeunganishwa.'):t('You can enjoy Couple Zone without connecting a partner. Inviting someone is optional.','Unaweza kutumia Couple Zone bila kuunganisha mwenza. Kumwalika ni hiari.');}
 async function loadActivities(){const {data,error}=await db.from('activities').select('*').range(0,999);if(error){console.error(error);activities=[];return;}activities=data||[];}
-async function showApp(u){user=u;$('authPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');$('bottomNav').classList.remove('hidden');$('hello').textContent=t('Welcome','Karibu')+(u.user_metadata?.display_name?', '+u.user_metadata.display_name:'');$('profileName').textContent=u.user_metadata?.display_name||t('Your profile','Wasifu wako');$('profileEmail').textContent=u.email||'';await ensureProfile();await refreshCouple();await loadActivities();renderAll();showView('home');}
-const surpriseStyles = [
+ let surpriseImages = [];
+
+async function loadSurpriseImages(){
+  const {data,error}=await db.storage
+    .from('couple-zone-images')
+    .list('romance',{limit:100});
+
+  if(error){
+    console.error('Picha hazijapakiwa:',error.message);
+    return;
+  }
+
+  surpriseImages=(data||[])
+    .filter(file=>file.id && /\.(jpg|jpeg|png|webp)$/i.test(file.name))
+    .map(file=>({
+      name:file.name,
+      url:db.storage
+        .from('couple-zone-images')
+        .getPublicUrl('romance/'+file.name).data.publicUrl
+    }));
+
+  console.log('Picha zilizopatikana:',surpriseImages.length);
+} 
+async function showApp(u){
+
+  user = u;
+
+  $('authPanel').classList.add('hidden');
+  $('appPanel').classList.remove('hidden');
+  $('bottomNav').classList.remove('hidden');
+
+  $('hello').textContent =
+    t('Welcome','Karibu') +
+    (u.user_metadata?.display_name
+      ? ', ' + u.user_metadata.display_name
+      : '');
+
+  $('profileName').textContent =
+    u.user_metadata?.display_name ||
+    t('Your profile','Wasifu wako');
+
+  $('profileEmail').textContent = u.email || '';
+
+  await ensureProfile();
+
+  await refreshCouple();
+
+  await loadActivities();
+
+  await loadSurpriseImages();
+
+  renderAll();
+
+  showView('home');
+}
+  const surpriseStyles = [
   {
     id: 'romantic-connection',
     category: 'Romantic Connection',
