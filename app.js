@@ -179,10 +179,7 @@ function init(){
   $('loginTab').onclick=()=>setMode('login');
   $('signupTab').onclick=()=>setMode('signup');
   
-  $('authForm').onsubmit=(e)=>{
-  e.preventDefault();
-  msg('FORM INAFANYA KAZI!', false);
-};
+  $('authForm').onsubmit=authSubmit;
 
   $('langBtn').onclick=language;
   $('logout').onclick=logout;
