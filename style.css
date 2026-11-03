@@ -44,3 +44,31 @@ button:disabled{opacity:.6;cursor:wait}
 .admin-row img{width:110px;height:110px;object-fit:contain;background:#10091e;border-radius:12px}
 .admin-row input{margin:0 0 8px}
 .admin-status{color:var(--pink2);font-size:12px;min-height:14px;display:block}
+
+/* Memories + Partner Quiz */
+.navitem{width:min(20%,110px)}
+.mem-form{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:18px}
+.mem-form textarea{width:100%;background:#100b1c;border:1px solid var(--line);border-radius:12px;color:#fff;padding:13px;font:inherit;resize:vertical;outline:none}
+.mem-form textarea:focus{border-color:var(--pink)}
+.mem-actions{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--muted)}
+.mem-list{display:grid;gap:12px}
+.mem-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px}
+.mem-top{display:flex;justify-content:space-between;color:var(--pink2);font-size:13px}
+.mem-top small{color:var(--muted)}
+.mem-card p{margin:10px 0 6px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.quiz-body{max-width:620px;margin:16px auto}
+.quiz-body h2{margin:8px 0 14px}.quiz-body h4{margin:18px 0 8px;color:var(--pink2);font-size:13px}
+.quiz-body button.full{margin-top:14px}
+.quiz-bar{height:6px;background:#2a1d3f;border-radius:6px;margin:10px 0 18px;overflow:hidden}
+.quiz-bar i{display:block;height:100%;background:linear-gradient(100deg,#e77eac,#bd6eae)}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt-btn{padding:13px 12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;color:#fff;font:inherit;font-size:14px;cursor:pointer;text-align:left}
+.opt-btn.picked{background:#713f70;border-color:#d58abd}
+.primary:disabled{opacity:.45}
+.quiz-score{display:flex;gap:12px;margin:12px 0 18px}
+.quiz-score div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center}
+.quiz-score b{display:block;font-size:30px;color:var(--pink)}.quiz-score small{color:var(--muted)}
+.quiz-res{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.quiz-res h4{margin:0 0 8px;color:#fff;font-size:14px}.quiz-res p{margin:4px 0;font-size:13px;color:var(--muted)}
+.quiz-res b{color:#fff}.quiz-res .ok{color:#8fe3b0}.quiz-res .no{color:#ff9caa}
+@media(max-width:390px){.opt-grid{grid-template-columns:1fr}}

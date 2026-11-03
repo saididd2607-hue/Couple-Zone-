@@ -11,9 +11,9 @@ function toast(m){const e=document.createElement('div');e.className='toast';e.te
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function msg(s,error=false){$('authMsg').textContent=s;$('authMsg').style.color=error?'#ff9caa':'';}
 function setMode(m){mode=m;$('password').type='password';$('togglePw').textContent='👁';$('loginTab').classList.toggle('active',m==='login');$('signupTab').classList.toggle('active',m==='signup');$('nameWrap').classList.toggle('hidden',m!=='signup');$('adultWrap').classList.toggle('hidden',m!=='signup');$('displayName').required=m==='signup';$('adult').required=m==='signup';$('forgotWrap').classList.toggle('hidden',m==='signup');$('authSubmit').textContent=t(m==='login'?'Log in':'Create account',m==='login'?'Ingia':'Fungua akaunti');msg('');}
-function showView(v){['home','explore','favorites','profile','surprise','bedAdmin'].forEach(x=>{$(x+'View').classList.toggle('hidden',x!==v);$(x+'View').classList.toggle('active-view',x===v);});document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('selected',b.dataset.view===v));if(v==='explore')renderExplore();if(v==='favorites')renderFavorites();}
+function showView(v){['home','explore','favorites','profile','surprise','bedAdmin','memories','quiz'].forEach(x=>{$(x+'View').classList.toggle('hidden',x!==v);$(x+'View').classList.toggle('active-view',x===v);});document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('selected',b.dataset.view===v));if(v==='explore')renderExplore();if(v==='favorites')renderFavorites();if(v==='memories')renderMemories();if(v==='quiz')renderQuiz();}
 async function ensureProfile(){const name=user.user_metadata?.display_name||(user.email||'').split('@')[0];const {error}=await db.from('profiles').upsert({id:user.id,display_name:name,email:user.email},{onConflict:'id'});if(error)console.warn(error.message);}
-async function refreshCouple(){const {data,error}=await db.from('couple_members').select('couple_id').eq('user_id',user.id).limit(1);$('coupleStatus').textContent=!error&&data?.length?t('Your couple space is connected.','Nafasi yenu imeunganishwa.'):t('You can enjoy Couple Zone without connecting a partner. Inviting someone is optional.','Unaweza kutumia Couple Zone bila kuunganisha mwenza. Kumwalika ni hiari.');}
+async function refreshCouple(){const {data,error}=await db.from('couple_members').select('couple_id').eq('user_id',user.id).limit(1);myCoupleId=!error&&data?.length?data[0].couple_id:null;$('coupleStatus').textContent=!error&&data?.length?t('Your couple space is connected.','Nafasi yenu imeunganishwa.'):t('You can enjoy Couple Zone without connecting a partner. Inviting someone is optional.','Unaweza kutumia Couple Zone bila kuunganisha mwenza. Kumwalika ni hiari.');}
 async function loadActivities(){const {data,error}=await db.from('activities').select('*').range(0,999);if(error){console.error(error);activities=[];return;}activities=data||[];}
  let surpriseImages = [];
 
@@ -38,6 +38,89 @@ async function loadSurpriseImages(){
 
   console.log('Picha zilizopatikana:',surpriseImages.length);
 } 
+let myCoupleId=null,qs={screen:"intro"},qMine=[],qPartner=[];
+const QUIZ=[
+["Your ideal free weekend?","Wikendi yako bora ya mapumziko?",[["Resting at home","Kupumzika nyumbani"],["Out with friends","Kutoka na marafiki"],["Traveling or exploring","Kusafiri au kutalii"],["Cooking or a hobby","Kupika au burudani binafsi"]]],
+["Favorite kind of food?","Aina ya chakula unachopenda zaidi?",[["Home-cooked meals","Chakula cha nyumbani"],["Street food","Chakula cha mitaani"],["Restaurant dining","Mgahawani"],["Sweet treats","Vitu vitamu"]]],
+["What relaxes you most after a long day?","Nini kinakupumzisha zaidi baada ya siku ndefu?",[["Music","Muziki"],["Sleep","Kulala"],["Talking with someone","Kuongea na mtu"],["TV or phone","TV au simu"]]],
+["How do you most like to receive love?","Unapenda kupokea mapenzi vipi zaidi?",[["Kind words","Maneno mazuri"],["Quality time","Muda wa ubora pamoja"],["Gifts","Zawadi"],["Hugs and touch","Kumbatio na ukaribu"]]],
+["Dream holiday?","Likizo ya ndoto?",[["Beach","Ufukweni"],["Mountains or safari","Milimani au safari"],["Big city","Mji mkubwa"],["Staying home","Kukaa nyumbani"]]],
+["When are you most energetic?","Ni wakati gani una nguvu zaidi?",[["Early morning","Asubuhi na mapema"],["Afternoon","Mchana"],["Evening","Jioni"],["Late night","Usiku wa manane"]]],
+["When you are upset, what do you need?","Ukiwa umekasirika, unahitaji nini?",[["Space","Nafasi ya peke yangu"],["To talk it out","Kuzungumza"],["A hug","Kumbatio"],["A distraction","Kuburudika"]]],
+["Favorite weather?","Hali ya hewa unayopenda?",[["Sunny and hot","Jua kali"],["Rainy","Mvua"],["Cool and breezy","Baridi na upepo"],["Cloudy","Mawingu"]]],
+["Best kind of date?","Miadi bora zaidi ni ipi?",[["Dinner out","Chakula nje"],["Movie at home","Filamu nyumbani"],["Outdoor adventure","Matembezi ya nje"],["Music and dancing","Muziki na kucheza"]]],
+["Biggest dream?","Ndoto yako kubwa zaidi?",[["Own business","Biashara yangu mwenyewe"],["Travel the world","Kuzunguka dunia"],["A happy family","Familia yenye furaha"],["Career success","Mafanikio kazini"]]],
+["How do you like to celebrate your birthday?","Unapenda kusherehekea siku yako ya kuzaliwa vipi?",[["Big party","Sherehe kubwa"],["Quiet dinner","Chakula tulivu"],["A surprise","Mshangao"],["Just a gift","Zawadi tu"]]],
+["Which music do you enjoy most?","Muziki gani unaoupenda zaidi?",[["Bongo Flava","Bongo Flava"],["Gospel or Taarab","Injili au Taarab"],["R&B or Soul","R&B au Soul"],["Afrobeats","Afrobeats"]]]
+];
+const qo=(qi,ci)=>{const x=QUIZ[qi][2][ci];return x?(sw?x[1]:x[0]):"—";};
+const qq=i=>sw?QUIZ[i][1]:QUIZ[i][0];
+function optBtns(qi,attr,picked){return QUIZ[qi][2].map((o,ci)=>`<button type="button" class="opt-btn ${picked===ci?"picked":""}" data-${attr}="${ci}">${esc(sw?o[1]:o[0])}</button>`).join("");}
+async function renderQuiz(){
+  $("quizBody").innerHTML=`<p class="message">…</p>`;
+  const {data,error}=await db.from("quiz_answers").select("*").limit(500);
+  if(error){$("quizBody").innerHTML=`<p class="message">${esc(error.message)}</p>`;return;}
+  const rows=data||[];
+  qMine=rows.filter(r=>r.user_id===user.id);
+  qPartner=rows.filter(r=>r.user_id!==user.id);
+  qs=qMine.length>=QUIZ.length?{screen:"done"}:{screen:"intro"};
+  drawQuiz();
+}
+function drawQuiz(){
+  const box=$("quizBody");
+  if(qs.screen==="q"){
+    const i=qs.i,ready=qs.ownPick!=null&&qs.guessPick!=null;
+    box.innerHTML=`<span class="eyebrow">${i+1} / ${QUIZ.length}</span><div class="quiz-bar"><i style="width:${(i/QUIZ.length)*100}%"></i></div><h2>${esc(qq(i))}</h2><h4>${t("Your answer","Jibu lako")}</h4><div class="opt-grid">${optBtns(i,"qown",qs.ownPick)}</div><h4>${t("What will your partner pick?","Mwenza wako atachagua nini?")}</h4><div class="opt-grid">${optBtns(i,"qguess",qs.guessPick)}</div><button id="quizNext" class="primary full" ${ready?"":"disabled"}>${i===QUIZ.length-1?t("Finish","Maliza"):t("Next","Endelea")}</button>`;
+    return;
+  }
+  if(qs.screen==="done"){
+    const pm={},mm={};qPartner.forEach(r=>pm[r.question_id]=r);qMine.forEach(r=>mm[r.question_id]=r);
+    const hasP=qPartner.length>0;let my=0,their=0;
+    QUIZ.forEach((_,i)=>{if(pm[i]&&mm[i]){if(mm[i].guess_choice===pm[i].own_choice)my++;if(pm[i].guess_choice===mm[i].own_choice)their++;}});
+    const rows=QUIZ.map((_,i)=>{const m=mm[i],p=pm[i],ok=m&&p&&m.guess_choice===p.own_choice;
+      return `<article class="quiz-res"><h4>${i+1}. ${esc(qq(i))}</h4><p>${t("You","Wewe")}: <b>${esc(m?qo(i,m.own_choice):"—")}</b></p><p>${t("Partner","Mwenza")}: <b>${esc(p?qo(i,p.own_choice):"—")}</b></p><p class="${p?(ok?"ok":"no"):""}">${t("You guessed","Ulibashiri")}: ${esc(m?qo(i,m.guess_choice):"—")} ${p?(ok?"✓":"✗"):""}</p></article>`;}).join("");
+    box.innerHTML=`<h2>${t("Your results","Matokeo yenu")}</h2>${hasP?`<div class="quiz-score"><div><b>${my}/${QUIZ.length}</b><small>${t("You guessed right","Ulibashiri sahihi")}</small></div><div><b>${their}/${QUIZ.length}</b><small>${t("Partner guessed right","Mwenza alibashiri sahihi")}</small></div></div>`:`<p class="message">${t("Your partner has not played yet. Their answers will appear here once they finish.","Mwenza wako bado hajacheza. Majibu yake yataonekana hapa akimaliza.")}</p>`}${rows}<button id="quizRefresh" class="secondary full" type="button">${t("Refresh","Onyesha upya")}</button><button id="quizAgain" class="primary full" type="button">${t("Play again","Cheza tena")}</button>`;
+    return;
+  }
+  box.innerHTML=`<span class="eyebrow">${t("PLAY TOGETHER","CHEZENI PAMOJA")}</span><h2>🎮 ${t("Partner Quiz","Maswali ya Wapenzi")}</h2><p class="message" style="color:var(--muted)">${t("For each question pick YOUR answer, then guess what your partner will pick. When you both finish, all the answers appear here.","Kwa kila swali chagua jibu LAKO, kisha bashiri mwenza wako atachagua nini. Mkimaliza wote, majibu yote yataonekana hapa.")}</p><p class="message" style="color:var(--muted)">${QUIZ.length} ${t("questions","maswali")}${myCoupleId?"":" · "+t("Connect your partner first so they can play too.","Mwalike mwenza wako kwanza ili naye acheze.")}</p><button id="quizStart" class="primary full" type="button">${t("Start","Anza")}</button>`;
+}
+async function finishQuiz(){
+  const rows=QUIZ.map((_,i)=>({user_id:user.id,couple_id:myCoupleId,question_id:i,own_choice:qs.own[i],guess_choice:qs.guess[i],updated_at:new Date().toISOString()}));
+  const {error}=await db.from("quiz_answers").upsert(rows,{onConflict:"user_id,question_id"});
+  if(error){toast(error.message);qs.i=QUIZ.length-1;drawQuiz();return;}
+  await renderQuiz();
+}
+async function quizClick(e){
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.qown!==undefined){qs.ownPick=+b.dataset.qown;drawQuiz();}
+  else if(b.dataset.qguess!==undefined){qs.guessPick=+b.dataset.qguess;drawQuiz();}
+  else if(b.id==="quizStart"){qs={screen:"q",i:0,own:[],guess:[],ownPick:null,guessPick:null};drawQuiz();}
+  else if(b.id==="quizNext"){qs.own[qs.i]=qs.ownPick;qs.guess[qs.i]=qs.guessPick;qs.ownPick=null;qs.guessPick=null;qs.i++;if(qs.i>=QUIZ.length){b.disabled=true;await finishQuiz();}else drawQuiz();}
+  else if(b.id==="quizAgain"){qs={screen:"intro"};drawQuiz();}
+  else if(b.id==="quizRefresh"){renderQuiz();}
+}
+async function renderMemories(){
+  $("memMsg").textContent="";
+  $("memSub").textContent=myCoupleId?t("Write a memory and share it with your partner.","Andika kumbukumbu na umshirikishe mwenza wako."):t("Only you can see these until your partner joins.","Wewe tu ndiye unayeziona hadi mwenza wako ajiunge.");
+  const {data,error}=await db.from("couple_memories").select("*").order("created_at",{ascending:false}).limit(100);
+  if(error){$("memList").innerHTML=`<p class="message">${esc(error.message)}</p>`;return;}
+  const list=data||[];
+  $("memList").innerHTML=list.length?list.map(m=>`<article class="mem-card"><div class="mem-top"><b>${esc(m.author_id===user.id?t("You","Wewe"):(m.author_name||t("Partner","Mwenza")))}</b><small>${esc(new Date(m.created_at).toLocaleDateString(sw?"sw-TZ":"en-GB",{day:"numeric",month:"short",year:"numeric"}))}</small></div><p>${esc(m.content)}</p>${m.author_id===user.id?`<button class="linkbtn" type="button" data-memdel="${esc(m.id)}">${t("Delete","Futa")}</button>`:""}</article>`).join(""):`<p class="empty-note">${t("No memories yet. Write the first one 💜","Bado hakuna kumbukumbu. Andika ya kwanza 💜")}</p>`;
+}
+async function saveMemory(){
+  const text=$("memText").value.trim();if(!text)return;
+  $("memSave").disabled=true;
+  const {error}=await db.from("couple_memories").insert({content:text,couple_id:myCoupleId,author_id:user.id,author_name:user.user_metadata?.display_name||(user.email||"").split("@")[0]});
+  $("memSave").disabled=false;
+  if(error){$("memMsg").textContent=error.message;return;}
+  $("memText").value="";$("memCount").textContent="0/1000";toast(t("Memory shared 💜","Kumbukumbu imeshirikiwa 💜"));renderMemories();
+}
+async function deleteMemory(id){
+  if(!confirm(t("Delete this memory?","Futa kumbukumbu hii?")))return;
+  const {error}=await db.from("couple_memories").delete().eq("id",id);
+  if(error)toast(error.message);else renderMemories();
+}
+
 let bedroom=[],currentBed=null;
 const prettyName=n=>n.replace(/\.[a-z]+$/i,'').replace(/[_-]+/g,' ');
 async function loadBedroom(){
@@ -258,7 +341,7 @@ function createStyleImage(icon){
 function card(a){const title=sw?(a.title_sw||a.title_en):(a.title_en||a.title_sw),desc=sw?(a.description_sw||a.description_en):(a.description_en||a.description_sw);return `<article class="activity-card" data-activity="${esc(a.id)}"><div class="activity-top"><span>${icons[a.category]||'✨'} ${esc(catName(a.category))}</span><button class="heart-btn" data-fav="${esc(a.id)}">${favorite(a.id)?'♥':'♡'}</button></div><h3>${esc(title)}</h3><p>${esc(desc)}</p><span class="activity-time">◷ 15 min</span></article>`;}
 function cats(){return [...new Set(activities.map(a=>String(a.category||'').trim()).filter(Boolean))];}
 function renderCategories(){$('homeCategories').innerHTML=(bedroom.length?['Bedroom Time']:[]).concat(cats()).map(c=>`<button class="category-card" data-category="${esc(c)}"><span>${icons[c]||'✨'}</span><b>${esc(catName(c))}</b><small>${c==='Bedroom Time'?bedroom.length:activities.filter(a=>a.category===c).length} ${t('activities','shughuli')}</small></button>`).join('');}
-function renderHome(){renderCategories();$('homeActivities').innerHTML=activities.slice(0,6).map(card).join('');}
+function renderHome(){renderCategories();$('homeCategories').insertAdjacentHTML('afterbegin',`<button class="category-card" data-go="quiz"><span>🎮</span><b>${t('Partner Quiz','Maswali ya Wapenzi')}</b><small>${QUIZ.length} ${t('questions','maswali')}</small></button>`);$('homeActivities').innerHTML=activities.slice(0,6).map(card).join('');}
 function renderExplore(){const cs=['All',...(bedroom.length?['Bedroom Time']:[]),...cats()];$('exploreCategories').innerHTML=cs.map(c=>`<button class="chip ${activeCategory===c?'active':''}" data-category="${esc(c)}">${c==='All'?t('All','Zote'):esc(catName(c))}</button>`).join('');const q=$('searchInput').value.toLowerCase().trim();const list=activities.filter(a=>{const hay=[a.title_en,a.title_sw,a.description_en,a.description_sw,a.category].join(' ').toLowerCase();return(activeCategory==='All'||a.category===activeCategory)&&(!q||hay.includes(q));});if(activeCategory==='Bedroom Time'){renderBedroom(q);return;}$('exploreActivities').innerHTML=list.length?list.map(card).join(''):`<p class="message">${t('No activities found.','Hakuna shughuli zilizopatikana.')}</p>`;}
 function renderFavorites(){const list=activities.filter(a=>favorite(a.id)),bf=bedroom.filter(b=>isStyleFavorite('b'+b.id));$('favoriteActivities').innerHTML=(list.length||bf.length)?list.map(card).join('')+bf.map(bedCard).join(''):`<p class="message">${t('You have not saved any activities yet.','Bado hujahifadhi shughuli yoyote.')}</p>`;}
 function renderAll(){renderHome();renderExplore();renderFavorites();}
@@ -274,7 +357,7 @@ async function forgotPassword(){
   const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
   msg(error?error.message:t('Check your email for a reset link.','Angalia barua pepe yako kwa kiungo cha kubadilisha nenosiri.'),!!error);
 }
-async function logout(){await db.auth.signOut();user=null;currentSurprise=null;$('appPanel').classList.add('hidden');$('bottomNav').classList.add('hidden');$('authPanel').classList.remove('hidden');$('authForm').reset();setMode('login');}
+async function logout(){await db.auth.signOut();user=null;currentSurprise=null;myCoupleId=null;$('appPanel').classList.add('hidden');$('bottomNav').classList.add('hidden');$('authPanel').classList.remove('hidden');$('authForm').reset();setMode('login');}
 function language(){sw=!sw;document.documentElement.lang=sw?'sw':'en';
 $('heroEyebrow').textContent=t('A LITTLE CLOSER, EVERY DAY','KARIBIANENI KILA SIKU');
 $('welcome').innerHTML=sw?'Karibiana,<br><em>pamoja.</em>':'Grow closer,<br><em>together.</em>';
@@ -289,6 +372,8 @@ $('nextSurpriseBtn').textContent=t('🎲 Next Surprise','🎲 Mshangao Unaofuata
 $('searchInput').placeholder=t('Search activities…','Tafuta shughuli…');
 $('joinCode').placeholder=t('6-digit code','Msimbo wa tarakimu 6');
 $('modalFavorite').textContent=$('modalFavorite').textContent;
+$('navMemories').textContent=t('Memories','Kumbukumbu');$('memHeading').textContent=t('Our Memories','Kumbukumbu Zetu');$('memEyebrow').textContent=t('SHARED WITH LOVE','ZIMESHIRIKIWA KWA UPENDO');$('memSave').textContent=t('Share memory','Shiriki kumbukumbu');$('memText').placeholder=t('Write a memory…','Andika kumbukumbu…');$('quizEntry').textContent=t('🎮 Partner Quiz','🎮 Maswali ya Wapenzi');$('quizBack').textContent=t('← Back','← Rudi');
+if(user&&!$('memoriesView').classList.contains('hidden'))renderMemories();if(user&&!$('quizView').classList.contains('hidden'))drawQuiz();
 if(!user)setMode(mode);
 else{$('hello').textContent=t('Welcome','Karibu')+(user.user_metadata?.display_name?', '+user.user_metadata.display_name:'');refreshCouple();}
 if(currentSurprise){$('surpriseStyleTitle').textContent=sw?currentSurprise.titleSw:currentSurprise.title;$('surpriseStyleDescription').textContent=sw?currentSurprise.descriptionSw:currentSurprise.description;$('surpriseStyleGuide').textContent=sw?currentSurprise.guideSw:currentSurprise.guide;updateStyleFavBtn();renderStyleFavorites();}
@@ -301,6 +386,10 @@ function init(){
   $('authForm').onsubmit=authSubmit;
 
   $('langBtn').onclick=language;
+  $('memSave').onclick=saveMemory;
+  $('memText').oninput=()=>{$('memCount').textContent=$('memText').value.length+'/1000';};
+  $('quizBody').addEventListener('click',quizClick);
+  $('quizBack').onclick=()=>showView('home');
   $('openBedAdmin').onclick=()=>{renderBedAdmin();showView('bedAdmin');};
   $('bedAdminBack').onclick=()=>{renderAll();showView('profile');};
   $('bedAdminList').addEventListener('change',e=>{const r=e.target.closest('[data-adm-row]');if(r)saveBedName(r);});
@@ -363,6 +452,8 @@ function init(){
     const r=e.target.closest('[data-remove-style]');
     if(r){ removeStyleFavorite(r.dataset.removeStyle); return; }
 
+    const md=e.target.closest('[data-memdel]');
+    if(md){ deleteMemory(md.dataset.memdel); return; }
     const bf=e.target.closest('[data-bedfav]');
     if(bf){ e.stopPropagation(); toggleBedFav(bf.dataset.bedfav); return; }
     const bd=e.target.closest('[data-bed]');
