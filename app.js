@@ -3,9 +3,9 @@
 'use strict';
 const cfg=window.COUPLE_ZONE_CONFIG||{}, $=id=>document.getElementById(id);
 let db,user,mode='login',sw=false,activeCategory='All',activities=[],currentActivity=null;
-const icons={'Romance':'❤️','Deep Conversations':'🗣️','Fun Games':'🎲','Couple Challenges':'🏆','Love & Appreciation':'💕','Long Distance':'🌍','Relationship Growth':'🌱','Surprise Activities':'🎁','Bedroom Time':'💜'};
+const icons={'Romance':'❤️','Deep Conversations':'🗣️','Fun Games':'🎲','Couple Challenges':'🏆','Love & Appreciation':'💕','Long Distance':'🌍','Relationship Growth':'🌱','Surprise Activities':'🎁','Bedroom Time':'💜','Memories':'📸','Future':'🔮','Activities':'🎯','Communication':'💬'};
 const t=(en,swText)=>sw?swText:en;
-const catSw={'Romance':'Mahaba','Deep Conversations':'Mazungumzo ya Kina','Fun Games':'Michezo ya Kufurahisha','Couple Challenges':'Changamoto za Wapenzi','Love & Appreciation':'Upendo na Shukrani','Long Distance':'Umbali','Relationship Growth':'Ukuaji wa Uhusiano','Surprise Activities':'Mshangao','Bedroom Time':'Wakati wa Chumbani'};
+const catSw={'Romance':'Mahaba','Deep Conversations':'Mazungumzo ya Kina','Fun Games':'Michezo ya Kufurahisha','Couple Challenges':'Changamoto za Wapenzi','Love & Appreciation':'Upendo na Shukrani','Long Distance':'Umbali','Relationship Growth':'Ukuaji wa Uhusiano','Surprise Activities':'Mshangao','Bedroom Time':'Wakati wa Chumbani','Memories':'Kumbukumbu','Future':'Wakati Ujao','Activities':'Shughuli','Communication':'Mawasiliano'};
 const catName=c=>sw?(catSw[c]||c):c;
 function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2600);}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
